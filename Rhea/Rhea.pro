@@ -27,12 +27,14 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        source/rvc.cpp \
         source/6502/mos6502.cpp \
         source/misc/util.cpp \
         source/rcomputer.cpp
 
 HEADERS += \
         mainwindow.h \
+        source/rvc.h \
         source/6502/mos6502.h \
         source/misc/util.h \
         source/rcomputer.h

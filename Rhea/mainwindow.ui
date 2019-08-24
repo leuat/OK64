@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1143</width>
+    <width>1302</width>
     <height>637</height>
    </rect>
   </property>
@@ -46,6 +46,17 @@
       </item>
      </layout>
     </item>
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="btnNext">
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -53,7 +64,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1143</width>
+     <width>1302</width>
      <height>28</height>
     </rect>
    </property>

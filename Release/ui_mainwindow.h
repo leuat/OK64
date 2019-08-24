@@ -16,6 +16,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QToolBar>
@@ -34,6 +35,8 @@ public:
     QLabel *lblOutput;
     QTextBrowser *txtOutput;
     QTextBrowser *txtStatus;
+    QHBoxLayout *horizontalLayout_2;
+    QPushButton *btnNext;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -42,7 +45,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(1143, 637);
+        MainWindow->resize(1302, 637);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         gridLayout_2 = new QGridLayout(centralWidget);
@@ -85,11 +88,22 @@ public:
 
         gridLayout_2->addLayout(verticalLayout, 3, 0, 1, 1);
 
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        btnNext = new QPushButton(centralWidget);
+        btnNext->setObjectName(QString::fromUtf8("btnNext"));
+
+        horizontalLayout_2->addWidget(btnNext);
+
+
+        gridLayout_2->addLayout(horizontalLayout_2, 0, 0, 1, 1);
+
         gridLayout_2->setColumnStretch(0, 1);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1143, 28));
+        menuBar->setGeometry(QRect(0, 0, 1302, 28));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -107,6 +121,7 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Rhea Emulator", nullptr));
         lblOutput->setText(QString());
+        btnNext->setText(QCoreApplication::translate("MainWindow", "Next", nullptr));
     } // retranslateUi
 
 };

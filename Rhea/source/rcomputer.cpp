@@ -5,21 +5,24 @@ RComputer::RComputer()
 
 }
 
+void RComputer::Step()
+{
+    m_cpu.Eat();
+    m_rvc.Update();
+}
+
 void RComputer::PowerOn()
 {
+    m_cpu.Initialize();
     m_cpu.LoadOpcodes();
+    m_rvc.Init(&m_cpu.m.m_data);
 }
 
 void RComputer::run()
 {
     while (!m_abort) {
-        QImage img(320,200,QImage::Format_RGB32);
-/*        for (int j=0;j<200;j++)
-            for (int i=0;i<320;i++)
-                img.setPixelColor(i,j,QColor(rand()%255,rand()%255, rand()%255));*/
 
-
-        m_outPut = m_outPut.fromImage(img);
+        m_outPut = m_outPut.fromImage(m_rvc.m_img);
         emit emitOutput();
         msleep(25);
 

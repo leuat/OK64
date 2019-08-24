@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QDebug>
 #include "source/6502/mos6502.h"
-
+#include "source/rvc.h"
 class RComputer : public QThread
 {
     Q_OBJECT
@@ -17,7 +17,8 @@ public:
     bool m_abort = false;
 
     Mos6502 m_cpu;
-
+    RVC m_rvc;
+    void Step();
     void Update();
     void PowerOn();
     void run();

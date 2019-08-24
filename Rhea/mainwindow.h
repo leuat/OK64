@@ -27,6 +27,8 @@ private:
 
 public slots:
     void onEmitOutput();
+private slots:
+    void on_btnNext_clicked();
 };
 
 #endif // MAINWINDOW_H

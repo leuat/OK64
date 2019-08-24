@@ -54,6 +54,7 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../Rhea/main.cpp \
 		../Rhea/mainwindow.cpp \
+		../Rhea/source/rvc.cpp \
 		../Rhea/source/6502/mos6502.cpp \
 		../Rhea/source/misc/util.cpp \
 		../Rhea/source/rcomputer.cpp qrc_resources.cpp \
@@ -61,6 +62,7 @@ SOURCES       = ../Rhea/main.cpp \
 		moc_rcomputer.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
+		rvc.o \
 		mos6502.o \
 		util.o \
 		rcomputer.o \
@@ -243,10 +245,12 @@ DIST          = ../Rhea/resources/text/opcodes.txt \
 		../../../Qt/5.13.0/gcc_64/mkspecs/features/yacc.prf \
 		../../../Qt/5.13.0/gcc_64/mkspecs/features/lex.prf \
 		../Rhea/Rhea.pro ../Rhea/mainwindow.h \
+		../Rhea/source/rvc.h \
 		../Rhea/source/6502/mos6502.h \
 		../Rhea/source/misc/util.h \
 		../Rhea/source/rcomputer.h ../Rhea/main.cpp \
 		../Rhea/mainwindow.cpp \
+		../Rhea/source/rvc.cpp \
 		../Rhea/source/6502/mos6502.cpp \
 		../Rhea/source/misc/util.cpp \
 		../Rhea/source/rcomputer.cpp
@@ -630,8 +634,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../Rhea/resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../Qt/5.13.0/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Rhea/mainwindow.h ../Rhea/source/6502/mos6502.h ../Rhea/source/misc/util.h ../Rhea/source/rcomputer.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Rhea/main.cpp ../Rhea/mainwindow.cpp ../Rhea/source/6502/mos6502.cpp ../Rhea/source/misc/util.cpp ../Rhea/source/rcomputer.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Rhea/mainwindow.h ../Rhea/source/rvc.h ../Rhea/source/6502/mos6502.h ../Rhea/source/misc/util.h ../Rhea/source/rcomputer.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Rhea/main.cpp ../Rhea/mainwindow.cpp ../Rhea/source/rvc.cpp ../Rhea/source/6502/mos6502.cpp ../Rhea/source/misc/util.cpp ../Rhea/source/rcomputer.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../Rhea/mainwindow.ui $(DISTDIR)/
 
 
@@ -785,6 +789,7 @@ moc_mainwindow.cpp: ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtabwidget.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qicon.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QKeyEvent \
 		../Rhea/source/rcomputer.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/QPixmap \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QThread \
@@ -813,6 +818,7 @@ moc_mainwindow.cpp: ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../Rhea/source/rvc.h \
 		moc_predefs.h \
 		../../../Qt/5.13.0/gcc_64/bin/moc
 	/home/leuat/Qt/5.13.0/gcc_64/bin/moc $(DEFINES) --include /home/leuat/code/Rhea/Release/moc_predefs.h -I/home/leuat/Qt/5.13.0/gcc_64/mkspecs/linux-g++ -I/home/leuat/code/Rhea/Rhea -I/home/leuat/Qt/5.13.0/gcc_64/include -I/home/leuat/Qt/5.13.0/gcc_64/include/QtWidgets -I/home/leuat/Qt/5.13.0/gcc_64/include/QtGui -I/home/leuat/Qt/5.13.0/gcc_64/include/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../Rhea/mainwindow.h -o moc_mainwindow.cpp
@@ -910,6 +916,44 @@ moc_rcomputer.cpp: ../Rhea/source/rcomputer.h \
 		../Rhea/source/6502/mos6502.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QByteArray \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QMap \
+		../Rhea/source/misc/util.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QVector3D \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector3d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QString \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QRgb \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QDirIterator \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdiriterator.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdir.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfileinfo.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfile.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfiledevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QElapsedTimer \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qelapsedtimer.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QTextStream \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayout \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayoutitem.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qboxlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qwidget.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpalette.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qbrush.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfont.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontmetrics.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontinfo.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qcursor.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qkeysequence.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qevent.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurl.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurlquery.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../Rhea/source/rvc.h \
 		moc_predefs.h \
 		../../../Qt/5.13.0/gcc_64/bin/moc
 	/home/leuat/Qt/5.13.0/gcc_64/bin/moc $(DEFINES) --include /home/leuat/code/Rhea/Release/moc_predefs.h -I/home/leuat/Qt/5.13.0/gcc_64/mkspecs/linux-g++ -I/home/leuat/code/Rhea/Rhea -I/home/leuat/Qt/5.13.0/gcc_64/include -I/home/leuat/Qt/5.13.0/gcc_64/include/QtWidgets -I/home/leuat/Qt/5.13.0/gcc_64/include/QtGui -I/home/leuat/Qt/5.13.0/gcc_64/include/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../Rhea/source/rcomputer.h -o moc_rcomputer.cpp
@@ -1042,6 +1086,7 @@ main.o: ../Rhea/main.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtabwidget.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qicon.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QKeyEvent \
 		../Rhea/source/rcomputer.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/QPixmap \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QThread \
@@ -1070,6 +1115,7 @@ main.o: ../Rhea/main.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../Rhea/source/rvc.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QApplication \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qapplication.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qcoreapplication.h \
@@ -1186,6 +1232,7 @@ mainwindow.o: ../Rhea/mainwindow.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtabwidget.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qicon.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QKeyEvent \
 		../Rhea/source/rcomputer.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/QPixmap \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QThread \
@@ -1214,6 +1261,7 @@ mainwindow.o: ../Rhea/mainwindow.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../Rhea/source/rvc.h \
 		ui_mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QVariant \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QApplication \
@@ -1224,6 +1272,7 @@ mainwindow.o: ../Rhea/mainwindow.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qguiapplication.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qinputmethod.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QGridLayout \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QHBoxLayout \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLabel \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlabel.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qframe.h \
@@ -1232,6 +1281,9 @@ mainwindow.o: ../Rhea/mainwindow.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qmenu.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qaction.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qactiongroup.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QPushButton \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qpushbutton.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qabstractbutton.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QStatusBar \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qstatusbar.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QTextBrowser \
@@ -1244,8 +1296,12 @@ mainwindow.o: ../Rhea/mainwindow.cpp ../Rhea/mainwindow.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qtextformat.h \
 		../../../Qt/5.13.0/gcc_64/include/QtGui/qpen.h \
 		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QToolBar \
-		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtoolbar.h
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtoolbar.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QVBoxLayout
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../Rhea/mainwindow.cpp
+
+rvc.o: ../Rhea/source/rvc.cpp ../Rhea/source/rvc.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rvc.o ../Rhea/source/rvc.cpp
 
 mos6502.o: ../Rhea/source/6502/mos6502.cpp ../Rhea/source/6502/mos6502.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QByteArray \
@@ -1314,10 +1370,66 @@ mos6502.o: ../Rhea/source/6502/mos6502.cpp ../Rhea/source/6502/mos6502.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qsharedpointer.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qsharedpointer_impl.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QDebug \
-		../../../Qt/5.13.0/gcc_64/include/QtCore/QFile \
+		../Rhea/source/misc/util.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QVector3D \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector3d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtguiglobal.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtgui-config.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QImage \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qimage.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qcolor.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qrgb.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qrgba64.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpaintdevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qwindowdefs.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qwindowdefs_win.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qrect.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qmargins.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qsize.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpixelformat.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtransform.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qmatrix.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpolygon.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qregion.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdatastream.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qline.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpainterpath.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QString \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QRgb \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QDirIterator \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdiriterator.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdir.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfileinfo.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qfile.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qfiledevice.h \
-		../../../Qt/5.13.0/gcc_64/include/QtCore/QTextStream
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QElapsedTimer \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qelapsedtimer.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QTextStream \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayout \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayoutitem.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qboxlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qwidget.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpalette.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qbrush.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpixmap.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfont.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontmetrics.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontinfo.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qcursor.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qkeysequence.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qevent.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurl.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurlquery.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QFile
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mos6502.o ../Rhea/source/6502/mos6502.cpp
 
 util.o: ../Rhea/source/misc/util.cpp ../Rhea/source/misc/util.h \
@@ -1537,7 +1649,45 @@ rcomputer.o: ../Rhea/source/rcomputer.cpp ../Rhea/source/rcomputer.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/qcontiguouscache.h \
 		../Rhea/source/6502/mos6502.h \
 		../../../Qt/5.13.0/gcc_64/include/QtCore/QByteArray \
-		../../../Qt/5.13.0/gcc_64/include/QtCore/QMap
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QMap \
+		../Rhea/source/misc/util.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QVector3D \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector3d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QString \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/QRgb \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QDirIterator \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdiriterator.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qdir.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfileinfo.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfile.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qfiledevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QElapsedTimer \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qelapsedtimer.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/QTextStream \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayout \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qlayoutitem.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qboxlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qwidget.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qpalette.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qbrush.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfont.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontmetrics.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qfontinfo.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qcursor.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qkeysequence.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qevent.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurl.h \
+		../../../Qt/5.13.0/gcc_64/include/QtCore/qurlquery.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt/5.13.0/gcc_64/include/QtGui/qtouchdevice.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/qgridlayout.h \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QLayoutItem \
+		../../../Qt/5.13.0/gcc_64/include/QtWidgets/QWidget \
+		../Rhea/source/rvc.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rcomputer.o ../Rhea/source/rcomputer.cpp
 
 qrc_resources.o: qrc_resources.cpp 
