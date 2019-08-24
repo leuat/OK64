@@ -28,11 +28,13 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         source/6502/mos6502.cpp \
+        source/misc/util.cpp \
         source/rcomputer.cpp
 
 HEADERS += \
         mainwindow.h \
         source/6502/mos6502.h \
+        source/misc/util.h \
         source/rcomputer.h
 
 FORMS += \
@@ -44,4 +46,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    ../resources/text/opcodes.txt
+    resources/text/opcodes.txt
+
+RESOURCES += \
+    resources.qrc
