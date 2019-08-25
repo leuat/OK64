@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.9.2, 2019-08-24T20:10:34. -->
+<!-- Written by QtCreator 4.9.2, 2019-08-25T10:37:32. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{035abc5f-97a0-4d47-b97f-9b914276b017}</value>
+  <value type="QByteArray">{d0c7eb1f-064a-4a21-a463-bd8929f0c9c7}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -315,7 +315,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/leuat/code/Rhea/build-Rhea-Desktop_Qt_5_13_0_GCC_64bit-Release</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/leuat/code/Rhea/Release</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

@@ -8,6 +8,8 @@
 class RVC
 {
 public:
+    const int p_time = 0xFFF0;
+
     const int p_p1_x = 0xFF00;
     const int p_p1_y = 0xFF01;
     const int p_p1_c = 0xFF02;
@@ -15,8 +17,11 @@ public:
     const int p_p2_y = 0xFF05;
     const int p_p2_c = 0xFF06;
 
-    const int p_putpix = 0xFF10;
-    const int p_line = 0xFF11;
+    const int p_exec = 0xFF10;
+
+    const int p_pixel = 1;
+    const int p_line = 2;
+
     QVector<QColor> m_palette;
     RVC();
     QByteArray* m_memory;

@@ -165,11 +165,27 @@ bool Mos6502::Eat()
           return true;
       }
 
+      if (instruction == 0x49) { // eor imm
+          r.a = r.a^getImm();
+   //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
+          return true;
+      }
+      if (instruction == 0x4D) { // eor abs
+          r.a = r.a^m.m_data[getAbs()];
+   //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
+          return true;
+      }
+
       if (instruction == 0x20) { // jsr abs
           ushort pos = getAbs();
 //          r.pc+=2;
           pushI(r.pc);
           r.pc = pos;
+          return true;
+      }
+      if (instruction == 0x6D) { // adc abs
+          ushort pos = getAbs();
+          r.a += m.m_data[pos];
           return true;
       }
 
@@ -178,6 +194,11 @@ bool Mos6502::Eat()
           return true;
       }
 
+      if (instruction == 0x18) { // clc
+          r.C = 0;
+//          r.pc++;
+          return true;
+      }
       if (instruction == 0x0A) { // asl
           r.C = (r.a&128==128);
           r.a<<=1;

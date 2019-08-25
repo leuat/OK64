@@ -11,8 +11,13 @@ void RVC::Init(QByteArray *m)
     m_img = QImage(256,256,QImage::Format_RGB32);
     m_img.fill(QColor(0,0,0));
     m_palette.resize(256);
-    for (int color=0;color<256;color++)
+/*    for (int color=0;color<256;color++)
         m_palette[color] = QColor((color&0b00000111)*32,((color&0b00011000))*8,(color&0b11100000));
+*/
+    for (int color=0;color<256;color++) {
+        int c = color&63;
+        m_palette[color] = QColor((c&0b00000011)*64,((c&0b00001100))*16,(c&0b00110000)*4);
+    }
 
 }
 
@@ -35,13 +40,14 @@ void RVC::DrawLine(int x1, int y1, int x2, int y2, uchar color)
 
 void RVC::Update()
 {
-    if (get(p_putpix)!=0) {
+    (*m_memory)[p_time] = rand()&255;//m_memory->at(p_time)+11;
+    if (get(p_exec)==p_pixel) {
         PutPixel(get(p_p1_x), get(p_p1_y),get(p_p1_c));
-        set(p_putpix,0);
+        set(p_exec,0);
     }
-    if (get(p_line)!=0) {
+    if (get(p_exec)==p_line) {
         DrawLine(get(p_p1_x), get(p_p1_y),get(p_p2_x), get(p_p2_y),    get(p_p1_c));
-        set(p_line,0);
+        set(p_exec,0);
     }
 
 }

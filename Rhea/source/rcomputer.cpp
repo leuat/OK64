@@ -28,7 +28,7 @@ void RComputer::run()
     while (!m_abort) {
         if (m_run)
 
-          for (int i=0;i<1500000; i++)
+          for (int i=0;i<150000; i++)
             Step();
 
         m_outPut = m_outPut.fromImage(m_rvc.m_img);

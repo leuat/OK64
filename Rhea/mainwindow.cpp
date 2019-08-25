@@ -70,6 +70,7 @@ void MainWindow::UpdateStatus()
     out +="&nbsp; y = " + Util::numToHex((uchar)m_computer.m_cpu.r.y);
     out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
     out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
+    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_time]);
     out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_p1_x+i]));
