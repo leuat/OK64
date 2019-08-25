@@ -36,7 +36,7 @@ void MainWindow::DisplayProgram()
         if (b.length()==1) b="0"+b;
         b="&nbsp;"+b;
         if (pc==m_computer.m_cpu.r.pc)
-            b = "<b><font color=\"#4040F0\">"+b+"</font></b>";
+            b = "<b><font color=\"#2020FF\">"+b+"</font></b>";
 
         if (column==0) {
             b="<i><font color=\"#008000\">" + Util::numToHex(pc) + "</font>: "+b;
@@ -50,6 +50,14 @@ void MainWindow::DisplayProgram()
         pc++;
 
     }
+    Opcode cur = m_computer.m_cpu.m_opcodes[m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc]];
+    uchar b1 = m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc+1];
+    uchar b2 = m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc+2];
+    output+="<p>"+cur.m_name + "&nbsp;";
+    if (cur.m_type == m_computer.m_cpu.abs)
+        output += Util::numToHex(b1|b2<<8);
+    if (cur.m_type == m_computer.m_cpu.imm)
+        output += Util::numToHex(b1);
     ui->txtOutput->setText(output);
 }
 
@@ -60,9 +68,11 @@ void MainWindow::UpdateStatus()
     out +="&nbsp; a = " + Util::numToHex((uchar)m_computer.m_cpu.r.a);
     out +="&nbsp; x = " + Util::numToHex((uchar)m_computer.m_cpu.r.x);
     out +="&nbsp; y = " + Util::numToHex((uchar)m_computer.m_cpu.r.y);
+    out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
+    out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
     out +="<br>";
     for (ushort i=0;i<32;i++)
-        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[0xF000+i]));
+        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_p1_x+i]));
     ui->txtStatus->setText(out);
 }
 
@@ -81,4 +91,9 @@ void MainWindow::on_btnNext_clicked()
 {
     m_computer.Step();
 
+}
+
+void MainWindow::on_btnRun_clicked()
+{
+    m_computer.Run();
 }

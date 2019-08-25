@@ -11,6 +11,11 @@ void RComputer::Step()
     m_rvc.Update();
 }
 
+void RComputer::Run()
+{
+    m_run = true;
+}
+
 void RComputer::PowerOn()
 {
     m_cpu.Initialize();
@@ -21,10 +26,14 @@ void RComputer::PowerOn()
 void RComputer::run()
 {
     while (!m_abort) {
+        if (m_run)
+
+          for (int i=0;i<1500000; i++)
+            Step();
 
         m_outPut = m_outPut.fromImage(m_rvc.m_img);
         emit emitOutput();
-        msleep(25);
+        msleep(14);
 
     }
 }

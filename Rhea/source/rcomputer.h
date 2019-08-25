@@ -15,10 +15,11 @@ public:
     QPixmap m_outPut;
 
     bool m_abort = false;
-
+    bool m_run = false;
     Mos6502 m_cpu;
     RVC m_rvc;
     void Step();
+    void Run();
     void Update();
     void PowerOn();
     void run();

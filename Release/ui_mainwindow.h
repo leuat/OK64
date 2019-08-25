@@ -36,6 +36,7 @@ public:
     QTextBrowser *txtOutput;
     QTextBrowser *txtStatus;
     QHBoxLayout *horizontalLayout_2;
+    QPushButton *btnRun;
     QPushButton *btnNext;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -91,6 +92,11 @@ public:
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        btnRun = new QPushButton(centralWidget);
+        btnRun->setObjectName(QString::fromUtf8("btnRun"));
+
+        horizontalLayout_2->addWidget(btnRun);
+
         btnNext = new QPushButton(centralWidget);
         btnNext->setObjectName(QString::fromUtf8("btnNext"));
 
@@ -121,6 +127,7 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Rhea Emulator", nullptr));
         lblOutput->setText(QString());
+        btnRun->setText(QCoreApplication::translate("MainWindow", "Run", nullptr));
         btnNext->setText(QCoreApplication::translate("MainWindow", "Next", nullptr));
     } // retranslateUi
 

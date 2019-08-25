@@ -33,11 +33,15 @@ void Mos6502::LoadOpcodes()
         if (op=="" || op.startsWith("#"))
             continue;
         bool ok;
-        for (int i=1;i<fields.length();i++)
-            b.append((uchar)fields[i].trimmed().toInt(&ok,16));
+        for (int i=1;i<fields.length();i++) {
+            uchar op =(uchar)fields[i].trimmed().toInt(&ok,16);
+            if (op!=0)
+                m_opcodes[op] = Opcode(fields[0],i-1);
+        }
+       //     b.append((uchar)fields[i].trimmed().toInt(&ok,16));
 
 
-        m_opcodes[op] = b;
+        //m_opcodes[op] = new QByteArray(b);
     }
 
     file.close();
@@ -58,11 +62,34 @@ unsigned char Mos6502::getImm()
 
 }
 
-bool Mos6502::Evaluate(unsigned char instruction, QString op, int type)
+void Mos6502::push(unsigned char c)
 {
-    return ((uchar)m_opcodes[op].at(type)==(uchar)instruction);
+    r.sp++;
+    m.m_data[r.sp]=c;
 }
 
+unsigned char Mos6502::pop()
+{
+    r.sp--;
+    return m.m_data[r.sp+1];
+}
+
+void Mos6502::pushI(ushort c)
+{
+    push(c>>8);
+    push(c&0xFF);
+}
+
+ushort Mos6502::popI()
+{
+   return pop() | pop()<<8;
+}
+
+/*bool Mos6502::Evaluate(unsigned char instruction, QString op, int type)
+{
+    return ((uchar)m_opcodes[op]->at(type)==(uchar)instruction);
+}
+*/
 void Mos6502::SetPC(int i)
 {
     r.pc = i;
@@ -83,34 +110,92 @@ bool Mos6502::Eat()
 {
     uchar instruction = m.m_data[r.pc];
     r.pc++;
-    qDebug() << "Eat" << Util::numToHex(instruction);
- //   qDebug() << "imm " << Util::numToHex((uchar)m_opcodes["lda"].at(imm));
-    if (Evaluate(instruction,"jmp",abs)) {
-        r.pc = getAbs();
-        qDebug() << "jmp " << Util::numToHex(r.pc);
-        return true;
-    }
-    if (Evaluate(instruction,"lda",abs)) {
-        r.a = m.m_data[getAbs()];
-        qDebug() << "lda (abs) " << Util::numToHex(r.pc);
-        return true;
-    }
 
-    if (Evaluate(instruction,"lda",imm)) {
-        r.a = getImm();
-        qDebug() << "lda (imm) " << Util::numToHex(r.a);
-        return true;
-    }
+    if (instruction == 0x4C) { // jmp abs
+          r.pc = getAbs();
+      //    qDebug() << "jmp " << Util::numToHex(r.pc);
+          return true;
+      }
+      if (instruction == 0xee) { // inc abs
+          int pos = getAbs();
+    //      qDebug() << "inc " << pos;
+          m.m_data[pos] = m.m_data[pos]+1;
+          return true;
+      }
+      if (instruction == 0xD0) { // bne d0 rel
+          uchar pos = getImm();
+          if (r.Z!=1) r.pc = r.pc+(char)pos;
+          return true;
+      }
+      if (instruction == 0x90) { // bcc abs egentlig rel
+/*          ushort pos = getAbs();
+          if (r.C==0) r.pc = pos;*/
+          uchar pos = getImm();
+          if (r.C==0) {
+              r.pc = r.pc+(char)pos;
+           }
+          return true;
+      }
+      if (instruction == 0xcd) { // cmp abs
+          int pos = getAbs();
+    //      qDebug() << "cmp " << pos;
+          uchar cmp = m.m_data[pos]-r.a;
 
-    if (Evaluate(instruction,"sta",abs)) {
-        uint pos = getAbs();
+          if (cmp>127) { r.N = 1; r.C = 1; } else {r.C = 0; r.N=0;}
+          if (cmp==0) {r.Z = 1;} else {r.Z= 0;}
+          return true;
+      }
+      if (instruction == 0xc9) { // cmp imm
+          uchar val = getImm();
+          int cmp = (uchar)val - (uchar)r.a;
+          if (cmp<0) { r.N = 1; r.C = 1; } else {r.C = 0; r.N=0;}
 
-        m.m_data[pos] = r.a;
-        qDebug() << "sta (abs) " << Util::numToHex(pos);
+          if (cmp==0) {r.Z = 1;} else {r.Z= 0;}
+          return true;
+      }
+      if (instruction == 0xad) { // lda abs
+          r.a = m.m_data[getAbs()];
+    //      qDebug() << "lda (abs) " << Util::numToHex(r.pc);
+          return true;
+      }
 
-        return true;
-    }
+      if (instruction == 0xA9) { // lda imm
+          r.a = getImm();
+   //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
+          return true;
+      }
 
+      if (instruction == 0x20) { // jsr abs
+          ushort pos = getAbs();
+//          r.pc+=2;
+          pushI(r.pc);
+          r.pc = pos;
+          return true;
+      }
+
+      if (instruction == 0x60) { // rts
+          r.pc = popI();
+          return true;
+      }
+
+      if (instruction == 0x0A) { // asl
+          r.C = (r.a&128==128);
+          r.a<<=1;
+          r.setZ();
+          return true;
+      }
+
+      if (instruction == 0x8D) { // sta abs
+          uint pos = getAbs();
+
+          m.m_data[pos] = r.a;
+    //      qDebug() << "sta (abs) " << Util::numToHex(pos);
+
+          return true;
+      }
+
+    qDebug() << "UNKNOWN opcode " << Util::numToHex(instruction);
+    exit(1);
 }
 
 void Mos6502::Execute()
@@ -119,4 +204,9 @@ void Mos6502::Execute()
     bool ok = true;
     while (ok)
         ok = Eat();
+}
+
+void MOS6502Registers::setZ()
+{
+    Z = a==0;
 }

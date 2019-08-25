@@ -9,8 +9,10 @@
 class MOS6502Registers {
 public:
     int a=0,x=0,y=0;
-    int sp=0, pc=0x400;
-    int N,V,B,D,I,Z,C;
+    int sp=0xFF, pc=0x400;
+    int N=0,V=0,B=0,D=0,I=0,Z=0,C=0;
+
+    void setZ();
 };
 
 
@@ -26,6 +28,17 @@ public:
     int programStartAddress = 0x400;
 
     static Constants c;
+};
+
+class Opcode {
+public:
+    QString m_name;
+    int m_type;
+    Opcode(QString name, int type) {
+        m_name=name;
+        m_type=type;
+    }
+    Opcode() {}
 };
 
 
@@ -48,13 +61,22 @@ public:
 
     MOS6502Registers r;
     Memory m;
+    uchar cmp, cpx, cpy;
     Mos6502();
     void Initialize();
-    QMap<QString, QByteArray> m_opcodes;
+//    QMap<QString, QByteArray*> m_opcodes;
+    QMap<uchar, Opcode> m_opcodes;
     void LoadOpcodes();
     uint getAbs();
     uchar getImm();
-    bool Evaluate(uchar instruction, QString op,int type);
+    void push(uchar c);
+    uchar pop();
+
+    void pushI(ushort c);
+    ushort popI();
+
+
+//    bool Evaluate(uchar instruction, QString op,int type);
     void SetPC(int i);
     int LoadProgram(QString fn);
     bool Eat();
