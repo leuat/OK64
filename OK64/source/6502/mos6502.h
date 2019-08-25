@@ -8,8 +8,8 @@
 
 class MOS6502Registers {
 public:
-    int a=0,x=0,y=0;
-    int sp=0xFF, pc=0x400;
+    uchar a=0,x=0,y=0;
+    ushort sp=0xFF, pc=0x400;
     int N=0,V=0,B=0,D=0,I=0,Z=0,C=0;
 
     void setZ();
@@ -69,7 +69,6 @@ public:
 //    QMap<QString, QByteArray*> m_opcodes;
     QMap<uchar, Opcode> m_opcodes;
     void LoadOpcodes();
-
 
 
     uint getAbs();

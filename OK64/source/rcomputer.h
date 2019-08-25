@@ -18,6 +18,7 @@ public:
     bool m_run = false;
     Mos6502 m_cpu;
     RVC m_rvc;
+    float m_workLoad;
     void Step();
     void Run();
     void Update();

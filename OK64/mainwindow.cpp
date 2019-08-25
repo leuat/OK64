@@ -74,6 +74,7 @@ void MainWindow::UpdateStatus()
     out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_p1_x+i]));
+    out+="<br>Workload : " + QString::number((int)m_computer.m_workLoad) + "%";
     ui->txtStatus->setText(out);
 }
 
