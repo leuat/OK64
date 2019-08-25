@@ -12,7 +12,8 @@ public:
     ushort sp=0xFF, pc=0x400;
     int N=0,V=0,B=0,D=0,I=0,Z=0,C=0;
 
-    void setZ();
+    void setZN(uchar v);
+    void setC(uchar v);
 };
 
 

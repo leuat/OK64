@@ -26,7 +26,7 @@ void MainWindow::DisplayProgram()
 {
     bool done = false;
     QString output = "<p>";
-    int pc = Constants::c.programStartAddress;
+    int pc = ((m_computer.m_cpu.r.pc/16)-8)*16;
 
     int cnt = 0;
     int column = 0;
@@ -55,7 +55,11 @@ void MainWindow::DisplayProgram()
     uchar b2 = m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc+2];
     output+="<p>"+cur.m_name + "&nbsp;";
     if (cur.m_type == m_computer.m_cpu.abs)
-        output += Util::numToHex(b1|b2<<8);
+        output += Util::numToHex(b1|b2<<8) + "  ("+Util::numToHex(m_computer.m_cpu.m.m_data[b1|b2<<8]) + ")";
+    if (cur.m_type == m_computer.m_cpu.abx)
+        output += Util::numToHex(b1|b2<<8)+","+Util::numToHex(m_computer.m_cpu.r.x) + "   ("+Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[b1|b2<<8+m_computer.m_cpu.r.x])) + ")";
+    if (cur.m_type == m_computer.m_cpu.aby)
+        output += Util::numToHex(b1|b2<<8)+","+Util::numToHex(m_computer.m_cpu.r.y) + "   ("+Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[b1|b2<<8+m_computer.m_cpu.r.y])) + ")";
     if (cur.m_type == m_computer.m_cpu.imm)
         output += Util::numToHex(b1);
     ui->txtOutput->setText(output);

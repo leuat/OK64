@@ -161,6 +161,18 @@ bool Mos6502::Eat()
         SpendCycles(cyc);
         return true;
     }
+    if (instruction == 0x10) { // bpl abs egentlig rel
+        /*          ushort pos = getAbs();
+          if (r.C==0) r.pc = pos;*/
+        uchar pos = getImm();
+        int cyc = 2;
+        if (r.N==0) {
+            cyc++;
+            r.pc = r.pc+(char)pos;
+        }
+        SpendCycles(cyc);
+        return true;
+    }
     if (instruction == 0xcd) { // cmp abs
         int pos = getAbs();
         //      qDebug() << "cmp " << pos;
@@ -182,6 +194,14 @@ bool Mos6502::Eat()
     if (instruction == 0xad) { // lda abs
         r.a = m.m_data[getAbs()];
         SpendCycles(4);
+        r.setZN(r.a);
+        //      qDebug() << "lda (abs) " << Util::numToHex(r.pc);
+        return true;
+    }
+    if (instruction == 0xbd) { // lda abs,x
+        r.a = m.m_data[getAbs()+r.x];
+        SpendCycles(5);
+        r.setZN(r.a);
         //      qDebug() << "lda (abs) " << Util::numToHex(r.pc);
         return true;
     }
@@ -189,49 +209,57 @@ bool Mos6502::Eat()
     if (instruction == 0xA9) { // lda imm
         SpendCycles(2);
         r.a = getImm();
+        r.setZN(r.a);
         //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0xA0) { // ldy imm
         SpendCycles(2);
         r.y = getImm();
+        r.setZN(r.y);
+        return true;
+    }
+    if (instruction == 0xA2) { // ldx imm
+        SpendCycles(2);
+        r.x = getImm();
+        r.setZN(r.x);
+        return true;
+    }
+    if (instruction == 0xAE) { // ldx abs
+        SpendCycles(4);
+        r.x = m.m_data[getAbs()];
+        r.setZN(r.x);
         return true;
     }
 
     if (instruction == 0x49) { // eor imm
         r.a = r.a^getImm();
         SpendCycles(2);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0x4D) { // eor abs
         r.a = r.a^m.m_data[getAbs()];
         SpendCycles(4);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0x05) { // ora zp
         r.a = r.a|m.m_data[getImm()];
         SpendCycles(3);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0x09) { // ora imm
         r.a = r.a|getImm();
         SpendCycles(2);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0x29) { // and imm
         r.a = r.a&getImm();
         SpendCycles(2);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
     if (instruction == 0x25) { // and zp
         r.a = r.a&m.m_data[getImm()];
         SpendCycles(3);
-        //       qDebug() << "lda (imm) " << Util::numToHex(r.a);
         return true;
     }
 
@@ -246,13 +274,38 @@ bool Mos6502::Eat()
       if (instruction == 0x6D) { // adc abs
           ushort pos = getAbs();
           SpendCycles(4);
+          r.setC(((int)r.a+m.m_data[pos])>255);
           r.a += m.m_data[pos];
+//           N V Z C
+          r.setZN(r.a);
           return true;
       }
-      if (instruction == 0x69) { // adc abs
+      if (instruction == 0xED) { // sbc abs
+          ushort pos = getAbs();
+          SpendCycles(4);
+          r.setC(((int)r.a-m.m_data[pos])<0);
+          r.a -= m.m_data[pos];
+//           N V Z C
+          r.setZN(r.a);
+          return true;
+      }
+      if (instruction == 0x7D) { // adc abs,x
+          ushort pos = getAbs()+r.x;
+          SpendCycles(5);
+          r.setC(((int)r.a+m.m_data[pos])>255);
+          r.a += m.m_data[pos];
+          r.setC(r.a==0);
+//           N V Z C
+          r.setZN(r.a);
+          return true;
+      }
+      if (instruction == 0x69) { // adc imm
           uchar val = getImm();
           SpendCycles(2);
+          r.setC(((int)r.a+val)>255);
           r.a += val;
+
+          r.setZN(r.a);
           return true;
       }
 
@@ -268,10 +321,42 @@ bool Mos6502::Eat()
 //          r.pc++;
           return true;
       }
+      if (instruction == 0x38) { // clc
+          r.C = 1;
+          SpendCycles(2);
+//          r.pc++;
+          return true;
+      }
+
+      if (instruction == 0xA8) { // tay
+          r.y = r.a;
+          return true;
+      }
+      if (instruction == 0xAA) { // tax
+          r.x = r.a;
+          return true;
+      }
+      if (instruction == 0x8a) { // txa
+          r.a = r.x;
+          return true;
+      }
+      if (instruction == 0x98) { // tya
+          r.a = r.y;
+          return true;
+      }
+      if (instruction == 0x9A) { // txs
+          r.sp = r.x;
+          return true;
+      }
+      if (instruction == 0xbA) { // tsx
+          r.x = r.sp;
+          return true;
+      }
+
       if (instruction == 0x0A) { // asl
           r.C = ((r.a&128)==128);
           r.a<<=1;
-          r.setZ();
+          r.setZN(r.a);
           SpendCycles(2);
 
           return true;
@@ -280,7 +365,7 @@ bool Mos6502::Eat()
           r.C = ((r.a&1)==1);
           r.a>>=1;
           //qDebug() << r.a;
-          r.setZ();
+          r.setZN(r.a);
           SpendCycles(2);
 
           return true;
@@ -308,6 +393,46 @@ bool Mos6502::Eat()
           return true;
       }
 */
+
+      if (instruction == 0xC8) { //iny
+          r.y++;
+          r.setZN(r.y);
+          r.setC(r.y==0);
+          return true;
+       }
+      if (instruction == 0xE8) {
+          r.x++;
+          r.setZN(r.x);
+          r.setC(r.x==0);
+          return true;
+       }
+      if (instruction == 0x88) {
+          r.y--;
+          r.setZN(r.y);
+          r.setC(r.y==255);
+
+          return true;
+       }
+      if (instruction == 0xca) {
+          r.x--;
+          r.setZN(r.x);
+          r.setC(r.x==255);
+          return true;
+       }
+
+      if (instruction == 0x9D) { // sta abs,x
+          ushort pos = getAbs();
+          m.m_data[pos+r.x]=r.a;
+          SpendCycles(5);
+          return true;
+      }
+      if (instruction == 0x99) { // sta abs,y
+          ushort pos = getAbs();
+          m.m_data[pos+r.y]=r.a;
+          SpendCycles(5);
+          return true;
+      }
+
       if (instruction == 0x85) { // sta zp
           uchar zp = getImm();
           m.m_data[zp] = r.a;
@@ -328,7 +453,13 @@ void Mos6502::Execute()
         ok = Eat();
 }
 
-void MOS6502Registers::setZ()
+void MOS6502Registers::setZN(uchar c)
 {
-    Z = a==0;
+    Z = c==0;
+    N = c>127;
+}
+
+void MOS6502Registers::setC(unsigned char v)
+{
+    C = v;
 }
