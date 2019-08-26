@@ -18,6 +18,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     RComputer m_computer;
+    QStringList m_commands;
+    int m_prevPC;
+    float m_workLoad;
     void DisplayProgram();
     void UpdateStatus();
     void keyPressEvent(QKeyEvent *e);

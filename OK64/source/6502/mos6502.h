@@ -14,6 +14,8 @@ public:
 
     void setZN(uchar v);
     void setC(uchar v);
+    uchar toFlag();
+    void fromFlag(uchar f);
 };
 
 
@@ -54,7 +56,7 @@ public:
     const int zpx = 3;
     const int zpy = 4;
     const int izx = 5;
-    const int zxy = 6;
+    const int izy = 6;
     const int abs = 7;
     const int abx = 8;
     const int aby = 9;
@@ -67,16 +69,18 @@ public:
     uchar cmp, cpx, cpy;
     Mos6502();
     void Initialize();
+    QString GetAddressOrSymbol(ushort pos);
 //    QMap<QString, QByteArray*> m_opcodes;
     QMap<uchar, Opcode> m_opcodes;
     void LoadOpcodes();
-
+    QMap<ushort, QString> m_symbols;
+    QVector<ushort> m_breakPoints;
 
     uint getAbs();
     uchar getImm();
     void push(uchar c);
     uchar pop();
-
+    void LoadSybols(QString symFile);
     int m_cycles = 0;
     void ClearCycles();
     void SpendCycles(int cnt);
@@ -92,6 +96,7 @@ public:
     int LoadProgram(QString fn);
     bool Eat();
     void Execute();
+    QString getInstructionAt(ushort& pc);
 
 };
 

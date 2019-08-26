@@ -26,7 +26,7 @@ void MainWindow::DisplayProgram()
 {
     bool done = false;
     QString output = "<p>";
-    int pc = ((m_computer.m_cpu.r.pc/16)-8)*16;
+    ushort pc = ((m_computer.m_cpu.r.pc/16)-8)*16;
 
     int cnt = 0;
     int column = 0;
@@ -50,18 +50,36 @@ void MainWindow::DisplayProgram()
         pc++;
 
     }
-    Opcode cur = m_computer.m_cpu.m_opcodes[m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc]];
-    uchar b1 = m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc+1];
-    uchar b2 = m_computer.m_cpu.m.m_data[m_computer.m_cpu.r.pc+2];
-    output+="<p>"+cur.m_name + "&nbsp;";
-    if (cur.m_type == m_computer.m_cpu.abs)
-        output += Util::numToHex(b1|b2<<8) + "  ("+Util::numToHex(m_computer.m_cpu.m.m_data[b1|b2<<8]) + ")";
-    if (cur.m_type == m_computer.m_cpu.abx)
-        output += Util::numToHex(b1|b2<<8)+","+Util::numToHex(m_computer.m_cpu.r.x) + "   ("+Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[b1|b2<<8+m_computer.m_cpu.r.x])) + ")";
-    if (cur.m_type == m_computer.m_cpu.aby)
-        output += Util::numToHex(b1|b2<<8)+","+Util::numToHex(m_computer.m_cpu.r.y) + "   ("+Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[b1|b2<<8+m_computer.m_cpu.r.y])) + ")";
-    if (cur.m_type == m_computer.m_cpu.imm)
-        output += Util::numToHex(b1);
+
+    pc = m_computer.m_cpu.r.pc;
+    while (m_commands.count()<4)
+        m_commands.append(" ");
+
+    while (m_commands.count()>4)
+        m_commands.removeFirst();
+    for (int i=0;i<m_commands.count()-1;i++) {
+        output+="<br>"+m_commands[i];
+    }
+    for (int i=0;i<4;i++) {
+        QString f="";
+        QString af = "";
+        QString cmd = m_computer.m_cpu.getInstructionAt(pc);
+
+            if (i==0) {
+                f="<font color=\"#80FF80\">";
+                af="</font>";
+                if (m_prevPC!=pc) {
+                    m_prevPC = pc;
+                    m_commands.append(cmd);
+                }
+
+            }
+//            if (i!=0)
+            output+="<br>"+f+cmd+af;
+        }
+
+    for (ushort s: m_computer.m_cpu.m_symbols.keys())
+        output+=m_computer.m_cpu.m_symbols[s]+", ";
     ui->txtOutput->setText(output);
 }
 
@@ -74,11 +92,20 @@ void MainWindow::UpdateStatus()
     out +="&nbsp; y = " + Util::numToHex((uchar)m_computer.m_cpu.r.y);
     out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
     out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
+    out +="&nbsp; N = " + Util::numToHex((uchar)m_computer.m_cpu.r.N);
     out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_time]);
     out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_p1_x+i]));
-    out+="<br>Workload : " + QString::number((int)m_computer.m_workLoad) + "%";
+    out +="<br>";
+    for (ushort i=0;i<32;i++)
+        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[0xD400+i]));
+
+    // Smoothen workload
+    if (m_workLoad == 0.0)
+        m_workLoad = m_computer.m_workLoad;
+    m_workLoad = m_workLoad*0.98 + m_computer.m_workLoad*0.02;
+    out+="<br>Workload : " + QString::number((int)m_workLoad) + "%";
     ui->txtStatus->setText(out);
 }
 
