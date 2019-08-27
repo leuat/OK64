@@ -18,15 +18,19 @@
 class RAudio : public QObject {
     Q_OBJECT
 public:
+    bool done = false;
     QAudioFormat audioFormat;
     QByteArray m_soundBuffer;
+    QAudioOutput* audio;
     bool isPlaying = false;
-    int m_cur,m_size = 0;
+    int m_cur = 1,m_size = 0;
+    QBuffer* m_input;
 
     void Init();
 
     void Audio();
-
+public slots:
+    void handleStateChanged(QAudio::State newState);
 };
 
 

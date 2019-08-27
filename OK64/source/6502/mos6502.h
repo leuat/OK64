@@ -4,6 +4,8 @@
 #include <QMap>
 #include <QDebug>
 #include "source/misc/util.h"
+#include "source/6502/impl.h"
+
 #define uchar unsigned char
 
 class MOS6502Registers {
@@ -63,11 +65,11 @@ public:
     const int ind = 10;
     const int rel = 11;
 
-
+    mos6502* m_impl;
     MOS6502Registers r;
-    Memory m;
+    static Memory m;
     uchar cmp, cpx, cpy;
-    Mos6502();
+    Mos6502() {}
     void Initialize();
     QString GetAddressOrSymbol(ushort pos);
 //    QMap<QString, QByteArray*> m_opcodes;
@@ -75,6 +77,16 @@ public:
     void LoadOpcodes();
     QMap<ushort, QString> m_symbols;
     QVector<ushort> m_breakPoints;
+
+
+
+    static void BusWrite(uint16_t a, uint8_t v) {
+        m.m_data[a] = v;
+    }
+    static uint8_t BusRead(uint16_t a) {
+        return m.m_data[a];
+    }
+
 
     uint getAbs();
     uchar getImm();

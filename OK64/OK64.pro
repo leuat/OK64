@@ -27,6 +27,7 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        source/6502/impl.cpp \
         source/rvc.cpp \
         source/6502/mos6502.cpp \
         source/misc/util.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h \
+        source/6502/impl.h \
         source/rvc.h \
         source/6502/mos6502.h \
         source/misc/util.h \

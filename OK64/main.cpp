@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/testline.sym");
 
 //        w.m_computer.m_cpu.m_breakPoints.append(0x133b);
-        w.m_computer.m_cpu.m_breakPoints.append(0x1179);
+//        w.m_computer.m_cpu.m_breakPoints.append(0x1179);
     }
     w.show();
 

@@ -3,15 +3,14 @@
 #include <QTextStream>
 
 Constants Constants::c;
+Memory Mos6502::m;
 
-Mos6502::Mos6502()
-{
-
-}
 
 void Mos6502::Initialize()
 {
     m.m_data.resize(65536);
+    m_impl = new mos6502(BusRead, BusWrite);
+    m_impl->pc = 0x400;
 }
 
 QString Mos6502::GetAddressOrSymbol(ushort pos)
@@ -146,6 +145,16 @@ int Mos6502::LoadProgram(QString fn)
 
 bool Mos6502::Eat()
 {
+    m_impl->Run(1);
+
+    r.a = m_impl->A;
+    r.x = m_impl->X;
+    r.y = m_impl->Y;
+    r.pc = m_impl->pc;
+    return true;
+
+
+
     ushort pc = r.pc;
 //    qDebug() << getInstructionAt(pc).replace("&nbsp;"," ");
 
