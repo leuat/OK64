@@ -5,7 +5,20 @@
 #include <QImage>
 #include <QDebug>
 #include <QPainter>
-class RVC
+
+#include "source/okmemory.h"
+
+
+class OKVC_State {
+public:
+    bool m_waitForVSYNC = false;
+    uchar screen_pointer;
+
+    QVector<QColor> m_palette;
+    OKMemory* m_pram, *m_vram;
+};
+
+class OKVC
 {
 public:
     const int p_time = 0xFFF0;
@@ -18,6 +31,7 @@ public:
     const int p_p2_x = 0xFF04;
     const int p_p2_y = 0xFF05;
     const int p_p2_c = 0xFF06;
+    const int p_p2_3 = 0xFF07;
 
     const int p_exec = 0xFF10;
 
@@ -25,24 +39,29 @@ public:
     const int p_line = 2;
     const int p_clearscreen = 3;
     const int p_circlefill = 4;
-    bool m_waitForVSYNC = false;
+    const int p_palette = 5;
+    const int p_blit = 6;
 
-    QVector<QColor> m_palette;
-    RVC();
-    QByteArray* m_memory;
+    OKVC();
     QImage m_img;
+    QImage m_backbuffer;
+    QImage m_screen;
+    OKVC_State state;
     void PrepareRaster()
     {
-        m_waitForVSYNC = false;
-        (*m_memory)[p_vsync]=0;
+        state.m_waitForVSYNC = false;
+        state.m_pram->set(p_vsync,0);
     }
 
 
-    void Init(QByteArray* m);
+    void Init(OKMemory* pram, OKMemory* vram);
     void PutPixel(int x, int y, uchar color);
     void DrawCircle(int x, int y, int radius, uchar color, bool fill);
     void DrawLine(int x1, int y1, int x2, int y2, uchar color);
+    void Blit(int x1, int y1, int x2, int y2, int w, int h);
     void Update();
+    void VRAMtoScreen();
+    void GenerateOutputSignal();
     uchar get(uint i);
     uchar set(uint i, uchar j);
 };

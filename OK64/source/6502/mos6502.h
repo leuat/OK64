@@ -5,7 +5,7 @@
 #include <QDebug>
 #include "source/misc/util.h"
 #include "source/6502/impl.h"
-
+#include "source/okmemory.h"
 #define uchar unsigned char
 
 class MOS6502Registers {
@@ -23,11 +23,6 @@ public:
 
 
 
-
-class Memory {
-public:
-    QByteArray m_data;
-};
 
 class Constants
 {
@@ -67,10 +62,10 @@ public:
 
     mos6502* m_impl;
     MOS6502Registers r;
-    static Memory m;
+    static OKMemory* m;
     uchar cmp, cpx, cpy;
     Mos6502() {}
-    void Initialize();
+    void Initialize(OKMemory* pram);
     QString GetAddressOrSymbol(ushort pos);
 //    QMap<QString, QByteArray*> m_opcodes;
     QMap<uchar, Opcode> m_opcodes;
@@ -81,17 +76,17 @@ public:
 
 
     static void BusWrite(uint16_t a, uint8_t v) {
-        m.m_data[a] = v;
+        m->set(a,v);
     }
     static uint8_t BusRead(uint16_t a) {
-        return m.m_data[a];
+        return m->get(a);
     }
 
 
-    uint getAbs();
-    uchar getImm();
-    void push(uchar c);
-    uchar pop();
+  //  uint getAbs();
+  //  uchar getImm();
+   // void push(uchar c);
+  //  uchar pop();
     void LoadSybols(QString symFile);
     int m_cycles = 0;
     void ClearCycles();
@@ -99,13 +94,12 @@ public:
 
 
 
-    void pushI(ushort c);
-    ushort popI();
+//    void pushI(ushort c);
+//    ushort popI();
 
 
 //    bool Evaluate(uchar instruction, QString op,int type);
     void SetPC(int i);
-    int LoadProgram(QString fn);
     bool Eat();
     void Execute();
     QString getInstructionAt(ushort& pc);

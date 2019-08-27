@@ -4,7 +4,7 @@ RComputer::RComputer()
 {
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
-    m_sid.set_sampling_parameters(m_mhz,SAMPLE_INTERPOLATE,m_khz);
+    m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
 /*    bool set_sampling_parameters(double clock_freq, sampling_method method,
                      double sample_freq, double pass_freq = -1,
@@ -32,7 +32,7 @@ void RComputer::Step()
         m_run = false;
     }
   //  m_cpu.Eat();
-    m_rvc.Update();
+    m_okvc.Update();
 
 
 }
@@ -45,33 +45,65 @@ void RComputer::Run()
 
 void RComputer::PowerOn()
 {
-    m_cpu.Initialize();
+    m_pram.Init(65536);
+    m_vram.Init(65536*4);
+    m_cpu.Initialize(&m_pram);
     m_cpu.LoadOpcodes();
-    m_rvc.Init(&m_cpu.m.m_data);
+    m_okvc.Init(&m_pram, &m_vram);
+}
+
+int RComputer::LoadProgram(QString fn)
+{
+    QFile file(fn);
+    if (!file.open(QIODevice::ReadOnly)) return 0;
+    QByteArray blob = file.readAll();
+    int pos = blob[1]*0x100 + blob[0];
+    //qDebug() << blob.size();
+
+    int programSize = min(blob.size()+pos,65535);
+    blob.remove(0,2);
+    for (int i=0;i<programSize;i++)
+        m_pram.set(i+pos,blob[i]);
+
+    blob.remove(0,programSize);
+//    qDebug() << blob.size();
+    if (blob.size()>0) {
+  //      qDebug() << "VRAM size " << blob.size();
+        for (int i=0;i<blob.size();i++)
+            m_vram.set(i,blob[i]);
+
+
+    }
+    m_okvc.VRAMtoScreen();
+
+    return pos;
 }
 void RComputer::run()
 {
     while (!m_abort) {
 
         QElapsedTimer timer;
-        m_rvc.PrepareRaster();
+        m_okvc.PrepareRaster();
         timer.start();
         if (m_run) {
             m_cpu.ClearCycles();
-            while (m_cpu.m_cycles< m_cyclesPerFrame && m_rvc.m_waitForVSYNC==false && m_run)
+            while (m_cpu.m_cycles< m_cyclesPerFrame && m_okvc.state.m_waitForVSYNC==false && m_run)
                 Step();
 
-//            if (m_cpu.m_cycles>= m_cyclesPerFrame)
+            //            if (m_cpu.m_cycles>= m_cyclesPerFrame)
 //                qDebug() << "CAP at" << m_cpu.m_cycles << " of " <<m_cyclesPerFrame;
 
         }
         m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
 
         m_time++;
+        m_okvc.m_backbuffer = QImage(m_okvc.m_img);
         usleep(m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0);
 //        qDebug() << timer.nsecsElapsed()/1000.0;
-        emit emitOutput();
+        //m_okvc.GenerateOutputSignal();
+
         emit emitAudio();
+        emit emitOutput();
 
     }
     m_audio.done = true;
@@ -80,15 +112,18 @@ void RComputer::run()
 void RComputer::onAudio()
 {
     for (int i=0;i<0x20;i++)
-        m_sid.write(i,m_cpu.m.m_data[0xD400+i]);
+        m_sid.write(i,m_pram.get(0xD400+i));
 
     int s = m_audio.m_size;///50;
     cycle_count csdelta = round((float)m_mhz / ((float)m_khz));
+//    int pp = m_audio.m_input->pos();
+//    qDebug() << pp;
+
     for (int i=0;i<s;i++) {
         m_sid.clock(csdelta);
         int v = m_sid.output();
         float sample = (float)v/65536.0;
-//        sample = sin((m_time+i)*0.1)*0.1;
+ //       sample = sin((i)*(0.1*(sin(m_time/100.0)+1)))*0.1;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
         char byte00 = *ptr;         // 1st byte
         char byte01 = *(ptr + 1);   // 2nd byte
@@ -100,12 +135,22 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+2] = byte02;
         m_audio.m_soundBuffer[j+3] = byte03;
     }
+//    m_audio.CopyBuffer();
+
+
+}
+
+void RAudio::CopyBuffer()
+{
+    for (int i=0;i<m_tempSoundBuffer.count();i++)
+          m_tempSoundBuffer[i]=m_soundBuffer[i];
+
 }
 
 void RAudio::Init(int samplerate, float dur) {
     float sampleRate = samplerate;   // sample rate
     float duration = dur;     // duration in seconds
-    int n  = duration * sampleRate;   // number of data samples
+    int n  = int(duration * sampleRate);   // number of data samples
 
     m_size = n;
     m_soundBuffer.resize(n*4);
@@ -126,8 +171,8 @@ void RAudio::Init(int samplerate, float dur) {
     }
 
     audio = new QAudioOutput(audioFormat, this);
-      connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
+//    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+      m_input = new QBuffer(&m_tempSoundBuffer,nullptr);
       m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
 
       audio->start(m_input);
@@ -137,14 +182,27 @@ void RAudio::Init(int samplerate, float dur) {
 
 void RAudio::handleStateChanged(QAudio::State newState)
 {
+//    qDebug() << newState;
+    if (newState==QAudio::StoppedState) {
+  //      qDebug() << "STOPPED";
+    }
 
     if (newState==QAudio::IdleState && !done) {
-//        m_input->reset();
+//        qDebug() << "HERE" <<rand()%100;
+//        audio->stop();
+//        QThread::msleep(10);
+        CopyBuffer();
+//        m_input->close();
+  //      m_input->open(QIODevice::ReadOnly);
+//        qDebug() << audio->
+            m_input->seek(0);
+  //      audio->start(m_input);
 //        m_soundBuffer.setRawData(m_tempSoundBuffer.ch);
-        for (int i=0;i<m_tempSoundBuffer.count();i++) {
+/*        for (int i=0;i<m_tempSoundBuffer.count();i++) {
             m_soundBuffer[i]=m_tempSoundBuffer[i];
-        }
-        m_input->seek(0);
+        }*/
+//        exit(1);
+//        m_input->seek(0);
 //        m_input->start
         //audio->start(m_input);
     }
@@ -153,4 +211,27 @@ void RAudio::handleStateChanged(QAudio::State newState)
         delete m_input;
         m_input = nullptr;
     }
+}
+
+qint64 QInfiniteBuffer::readData(char *output, qint64 maxlen)
+{
+    qint64 outputpos=0;
+    const QByteArray &d=data();
+    memcpy(output, d.constData(),maxlen);
+    return maxlen;
+
+    do
+    {
+        qint64 sizetocopy=maxlen-outputpos;
+        if((maxlen-outputpos)>(d.size()-m_pos))
+            sizetocopy=d.size()-m_pos;
+
+        memcpy(output, d.constData() +m_pos,sizetocopy);
+        outputpos+=sizetocopy;
+        m_pos+=sizetocopy;
+        if(m_pos>=d.size())
+            m_pos=0;
+    } while(outputpos<maxlen);
+
+    return maxlen;
 }

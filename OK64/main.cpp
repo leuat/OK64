@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
             }
         }
         QString file = argv[c];
-        w.m_computer.m_cpu.LoadProgram(file);
+        w.m_computer.LoadProgram(file);
         w.m_computer.m_run =true;
     }
     else {
-        w.m_computer.m_cpu.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/testline.prg");
+        w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/testline.prg");
         w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/testline.sym");
 
 //        w.m_computer.m_cpu.m_breakPoints.append(0x133b);

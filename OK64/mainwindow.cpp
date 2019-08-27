@@ -31,7 +31,7 @@ void MainWindow::DisplayProgram()
     int cnt = 0;
     int column = 0;
     while (!done) {
-        uchar c = m_computer.m_cpu.m.m_data[pc];
+        uchar c = m_computer.m_pram.get(pc);
         QString b = Util::numToHex(c).remove("$");
         if (b.length()==1) b="0"+b;
         b="&nbsp;"+b;
@@ -93,13 +93,13 @@ void MainWindow::UpdateStatus()
     out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
     out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
     out +="&nbsp; N = " + Util::numToHex((uchar)m_computer.m_cpu.r.N);
-    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_time]);
+    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_pram.get(m_computer.m_okvc.p_time));
     out +="<br>";
     for (ushort i=0;i<32;i++)
-        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[m_computer.m_rvc.p_p1_x+i]));
+        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(m_computer.m_okvc.p_p1_x+i)));
     out +="<br>";
     for (ushort i=0;i<32;i++)
-        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_cpu.m.m_data[0xD400+i]));
+        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(0xD400+i)));
 
     // Smoothen workload
     if (m_workLoad == 0.0)
@@ -138,7 +138,8 @@ void MainWindow::SetDarkPalette() {
 
 void MainWindow::onEmitOutput()
 {
-    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_rvc.m_img);
+    m_computer.m_okvc.GenerateOutputSignal();
+    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen);
 
     ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
     UpdateStatus();

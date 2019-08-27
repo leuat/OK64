@@ -3,12 +3,12 @@
 #include <QTextStream>
 
 Constants Constants::c;
-Memory Mos6502::m;
+OKMemory* Mos6502::m;
 
 
-void Mos6502::Initialize()
+void Mos6502::Initialize(OKMemory* pram)
 {
-    m.m_data.resize(65536);
+    m = pram;
     m_impl = new mos6502(BusRead, BusWrite);
     m_impl->pc = 0x400;
 }
@@ -55,7 +55,7 @@ void Mos6502::LoadOpcodes()
 }
 
 
-uint Mos6502::getAbs()
+/*uint Mos6502::getAbs()
 {
     uint val = ((uchar)m.m_data[r.pc+1])*0x100 +  (uchar)m.m_data[r.pc];
     r.pc=r.pc+2;
@@ -81,7 +81,7 @@ unsigned char Mos6502::pop()
     r.sp--;
     return m.m_data[r.sp+1];
 }
-
+*/
 void Mos6502::LoadSybols(QString symFile)
 {
     QFile file(symFile);
@@ -111,7 +111,7 @@ void Mos6502::SpendCycles(int cnt)
     m_cycles+=cnt;
 }
 
-void Mos6502::pushI(ushort c)
+/*void Mos6502::pushI(ushort c)
 {
     push(c>>8);
     push(c&0xFF);
@@ -121,7 +121,7 @@ ushort Mos6502::popI()
 {
     return pop() | pop()<<8;
 }
-
+*/
 /*bool Mos6502::Evaluate(unsigned char instruction, QString op, int type)
 {
     return ((uchar)m_opcodes[op]->at(type)==(uchar)instruction);
@@ -132,16 +132,6 @@ void Mos6502::SetPC(int i)
     r.pc = i;
 }
 
-int Mos6502::LoadProgram(QString fn)
-{
-    QFile file(fn);
-    if (!file.open(QIODevice::ReadOnly)) return 0;
-    QByteArray blob = file.readAll();
-    int pos = blob[1]*0x100 + blob[0];
-    for (int i=2;i<blob.size();i++)
-        m.m_data[i-2+pos] = blob[i];
-    return pos;
-}
 
 bool Mos6502::Eat()
 {
@@ -153,7 +143,7 @@ bool Mos6502::Eat()
     r.pc = m_impl->pc;
     return true;
 
-
+/*
 
     ushort pc = r.pc;
 //    qDebug() << getInstructionAt(pc).replace("&nbsp;"," ");
@@ -209,8 +199,6 @@ bool Mos6502::Eat()
         return true;
     }
     if (instruction == 0x90) { // bcc abs egentlig rel
-        /*          ushort pos = getAbs();
-          if (r.C==0) r.pc = pos;*/
         char pos = getImm();
         int cyc = 2;
         if (r.C==0) {
@@ -221,8 +209,6 @@ bool Mos6502::Eat()
         return true;
     }
     if (instruction == 0xb0) { // bcs abs egentlig rel
-        /*          ushort pos = getAbs();
-          if (r.C==0) r.pc = pos;*/
         char pos = getImm();
         int cyc = 2;
         if (r.C!=0) {
@@ -235,8 +221,6 @@ bool Mos6502::Eat()
 
     }
     if (instruction == 0x30) { // bmi abs egentlig rel
-        /*          ushort pos = getAbs();
-          if (r.C==0) r.pc = pos;*/
         char pos = getImm();
         int cyc = 2;
         if (r.N==1) {
@@ -247,8 +231,6 @@ bool Mos6502::Eat()
         return true;
     }
     if (instruction == 0x10) { // bpl abs egentlig rel
-        /*          ushort pos = getAbs();
-          if (r.C==0) r.pc = pos;*/
         char pos = getImm();
         int cyc = 2;
         if (r.N==0) {
@@ -682,6 +664,7 @@ bool Mos6502::Eat()
     qDebug() << "UNKNOWN opcode " << Util::numToHex(instruction);
     return false;
 //    exit(1);
+*/
 }
 
 void Mos6502::Execute()
@@ -694,14 +677,14 @@ void Mos6502::Execute()
 
 QString Mos6502::getInstructionAt(ushort &pc)
 {
-    Opcode cur = m_opcodes[m.m_data[pc]];
-    uchar b1 = m.m_data[pc+1];
-    uchar b2 = m.m_data[pc+2];
+    Opcode cur = m_opcodes[m->get(pc)];
+    uchar b1 = m->get(pc+1);
+    uchar b2 = m->get(pc+2);
     QString output;
     output+=Util::numToHex(pc)+":&nbsp;"+cur.m_name + "&nbsp;";
     if (cur.m_name.trimmed()=="") {
         pc++;
-        return Util::numToHex(m.m_data[pc]);
+        return Util::numToHex(m->get(pc));
     }
 
     if (cur.m_type == abs)

@@ -28,6 +28,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         source/6502/impl.cpp \
+        source/okmemory.cpp \
         source/rvc.cpp \
         source/6502/mos6502.cpp \
         source/misc/util.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         source/6502/impl.h \
+        source/okmemory.h \
         source/rvc.h \
         source/6502/mos6502.h \
         source/misc/util.h \

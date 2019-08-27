@@ -32,25 +32,7 @@ public:
         m_pos=0;
     }
 
-    qint64 readData(char *output, qint64 maxlen)
-    {
-        qint64 outputpos=0;
-        const QByteArray &d=data();
-
-        do
-        {
-            qint64 sizetocopy=maxlen-outputpos;
-            if((maxlen-outputpos)>(d.size()-m_pos))
-                sizetocopy=d.size()-m_pos;
-            memcpy(output,d.constData()+m_pos,sizetocopy);
-            outputpos+=sizetocopy;
-            m_pos+=sizetocopy;
-            if(m_pos>=d.size())
-                m_pos=0;
-        } while(outputpos<maxlen);
-
-        return maxlen;
-    }
+    qint64 readData(char *output, qint64 maxlen) override;
 };
 
 
@@ -63,8 +45,8 @@ public:
     QByteArray m_tempSoundBuffer;
     QAudioOutput* audio;
     int m_size = 0;
-    QInfiniteBuffer* m_input;
-
+    QBuffer* m_input;
+    void CopyBuffer();
     void Init(int samplerate, float dur);
 
 public slots:
@@ -80,22 +62,28 @@ public:
     QPixmap m_outPut;
     bool m_abort = false;
     bool m_run = false;
+
     int m_mhz = 985000; // mhz
     int m_fps = 50; // hz
 //    int m_khz = 44100;
     int m_khz = 44100;
     int m_cyclesPerFrame = m_mhz/m_fps;
     int m_time = 0;
+
+    OKMemory m_pram, m_vram;
     RAudio m_audio;
     Mos6502 m_cpu;
-
-    RVC m_rvc;
+    OKVC m_okvc;
     SID m_sid;
+
     float m_workLoad;
     void Step();
     void Run();
     void Update();
     void PowerOn();
+    int LoadProgram(QString fn);
+
+
     void run();
 public slots:
     void onAudio();
