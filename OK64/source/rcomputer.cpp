@@ -1,9 +1,10 @@
 #include "rcomputer.h"
+
 RComputer::RComputer()
 {
-    m_audio.Init();
+    m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
-    m_sid.set_sampling_parameters(2000000,SAMPLE_INTERPOLATE,44100);
+    m_sid.set_sampling_parameters(m_mhz,SAMPLE_INTERPOLATE,m_khz);
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
 /*    bool set_sampling_parameters(double clock_freq, sampling_method method,
                      double sample_freq, double pass_freq = -1,
@@ -51,7 +52,6 @@ void RComputer::PowerOn()
 void RComputer::run()
 {
     while (!m_abort) {
-        emit emitAudio();
 
         QElapsedTimer timer;
         m_rvc.PrepareRaster();
@@ -61,13 +61,20 @@ void RComputer::run()
             while (m_cpu.m_cycles< m_cyclesPerFrame && m_rvc.m_waitForVSYNC==false && m_run)
                 Step();
 
+//            if (m_cpu.m_cycles>= m_cyclesPerFrame)
+//                qDebug() << "CAP at" << m_cpu.m_cycles << " of " <<m_cyclesPerFrame;
+
         }
-        m_workLoad = m_cpu.m_cycles/(m_cyclesPerFrame)*100.0;
-        m_outPut = m_outPut.fromImage(m_rvc.m_img);
-        emit emitOutput();
-        usleep(1000000/m_fps - timer.nsecsElapsed()/1000.0);
+        m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
+
         m_time++;
+        usleep(m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0);
+//        qDebug() << timer.nsecsElapsed()/1000.0;
+        emit emitOutput();
+        emit emitAudio();
+
     }
+    m_audio.done = true;
 }
 
 void RComputer::onAudio()
@@ -76,21 +83,12 @@ void RComputer::onAudio()
         m_sid.write(i,m_cpu.m.m_data[0xD400+i]);
 
     int s = m_audio.m_size;///50;
-    m_audio.m_cur=0;
-//    cycle_count csdelta = round((float)2000000 / ((float)44100 / 32));
-    cycle_count csdelta = round((float)1000000 / ((float)44100 / 1));
-//    qDebug()<< csdelta;
-
-//    m_sid.clock(csdelta,buf,32);
+    cycle_count csdelta = round((float)m_mhz / ((float)m_khz));
     for (int i=0;i<s;i++) {
-//        qDebug() << v;
-  //      short v = buf[i];
         m_sid.clock(csdelta);
         int v = m_sid.output();
-//        qDebug() << v;
-//        QByteArray* byteBuffer = &(m_audio.m_soundBuffer);
-        float sample = (float)v/10240.0;
-
+        float sample = (float)v/65536.0;
+//        sample = sin((m_time+i)*0.1)*0.1;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
         char byte00 = *ptr;         // 1st byte
         char byte01 = *(ptr + 1);   // 2nd byte
@@ -102,17 +100,18 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+2] = byte02;
         m_audio.m_soundBuffer[j+3] = byte03;
     }
-    m_audio.m_cur+=1;
 }
 
-void RAudio::Init() {
-    qreal sampleRate = 44100;   // sample rate
-    qreal duration = 1.000/50.0;     // duration in seconds
+void RAudio::Init(int samplerate, float dur) {
+    float sampleRate = samplerate;   // sample rate
+    float duration = dur;     // duration in seconds
     int n  = duration * sampleRate;   // number of data samples
 
     m_size = n;
     m_soundBuffer.resize(n*4);
     m_soundBuffer.fill(0);
+    m_tempSoundBuffer.resize(n*4);
+    m_tempSoundBuffer.fill(0);
     audioFormat.setSampleRate(static_cast<int>(sampleRate));
     audioFormat.setChannelCount(1);
     audioFormat.setSampleSize(32);   // set the sample size in bits. We set it to 32 bis, because we set SampleType to float (one float has 4 bytes ==> 32 bits)
@@ -128,97 +127,30 @@ void RAudio::Init() {
 
     audio = new QAudioOutput(audioFormat, this);
       connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-      m_input = new QBuffer(&m_soundBuffer);
+      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
       m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
 
       audio->start(m_input);
-/*      connect(audio, &QAudioOutput::stateChanged, [this->audio, m_input](QAudio::State newState)
-      {
-                if (newState == QAudio::IdleState)   // finished playing (i.e., no more data)
-               {
-//                    audio->start(m_input);
-               }
-          // should also handle more states, e.g., errors. I need to figure out on how to do this later.
-      });
-*/
       connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 }
 
-void RAudio::Audio() {
-
-
-
-    //if (isPlaying)
-     //   return;
-
-
-
-
-
-
-
-/*    QBuffer* m_input;
-    m_input = new QBuffer(&m_soundBuffer);
-    m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
-
-    // Create an audio output with our QAudioFormat
-    QAudioOutput* audio = new QAudioOutput(audioFormat, this);
-
-    // connect up signal stateChanged to a lambda to get feedback
-    connect(audio, &QAudioOutput::stateChanged, [audio, m_input](QAudio::State newState)
-    {
-              if (newState == QAudio::IdleState)   // finished playing (i.e., no more data)
-             {
-     //            qDebug() << "finished playing sound";
-                 delete audio;
-                 delete m_input;
-                  //isPlaying = false;
-                 //delete byteBuffer;  // I tried to delete byteBuffer pointer (because it may leak memories), but got compiler error. I need to figure this out later.
-             }
-        // should also handle more states, e.g., errors. I need to figure out on how to do this later.
-    });
-//    isPlaying = true;
-    audio->start(m_input);}
-    */
-}
 
 void RAudio::handleStateChanged(QAudio::State newState)
 {
-//    switch (newState) {
-  //  case QAudio::IdleState: // Finished playing (no more data)
-//    qDebug() << "Something else: " << newState;
-    if (newState==QAudio::IdleState) {
-/*        delete m_input;
-        m_input = new QBuffer(&m_soundBuffer);
-        m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only*/
-        m_input->reset();
-//        qDebug() << "HERE";
-//
-//        audio->start(m_input);
-    }
-/*        if(stop){
-            audio->stop();
-            qDebug() << "Stopped audio" << newState;
-            delete audio;
-            delete b;
-            delete buf;
-        }
-        else{ // restart from scratch
-            QDataStream s(buf, QIODevice::ReadWrite);
-            audio->start(s.device());
-        }
-        break;
 
-    case QAudio::StoppedState: // Stopped for other reasons
-        if (audio->error() != QAudio::NoError) { // Error handling
-            qDebug() << "Audio error: " << newState;
+    if (newState==QAudio::IdleState && !done) {
+//        m_input->reset();
+//        m_soundBuffer.setRawData(m_tempSoundBuffer.ch);
+        for (int i=0;i<m_tempSoundBuffer.count();i++) {
+            m_soundBuffer[i]=m_tempSoundBuffer[i];
         }
-        break;
-     */
-    /*default:
-        // ... other cases as appropriate
-        qDebug() << "Something else: " << newState;
-        break;
+        m_input->seek(0);
+//        m_input->start
+        //audio->start(m_input);
     }
-    */
+    if (done) {
+        audio->stop();
+        delete m_input;
+        m_input = nullptr;
+    }
 }

@@ -146,7 +146,7 @@ int Mos6502::LoadProgram(QString fn)
 bool Mos6502::Eat()
 {
     m_impl->Run(1);
-
+    m_cycles+=1;
     r.a = m_impl->A;
     r.x = m_impl->X;
     r.y = m_impl->Y;

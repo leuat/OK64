@@ -138,6 +138,8 @@ void MainWindow::SetDarkPalette() {
 
 void MainWindow::onEmitOutput()
 {
+    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_rvc.m_img);
+
     ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
     UpdateStatus();
     DisplayProgram();
