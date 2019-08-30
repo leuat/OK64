@@ -45,7 +45,9 @@ public:
     QByteArray m_tempSoundBuffer;
     QAudioOutput* audio;
     int m_size = 0;
-    QBuffer* m_input;
+    float m_bufscale = 1;
+    int m_cur = 0;
+    QInfiniteBuffer* m_input;
     void CopyBuffer();
     void Init(int samplerate, float dur);
 
