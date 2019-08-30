@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/text/opcodes.txt</file>
+    </qresource>
+</RCC>
