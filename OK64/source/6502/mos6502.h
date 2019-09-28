@@ -5,8 +5,14 @@
 #include <QDebug>
 #include "source/misc/util.h"
 #include "source/6502/impl.h"
+/*extern "C" {
+    #include "source/s6502/cpu.h"
+}*/
 #include "source/okmemory.h"
+
 #define uchar unsigned char
+
+
 
 class MOS6502Registers {
 public:

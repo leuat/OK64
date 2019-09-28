@@ -47,7 +47,8 @@ public:
     int m_size = 0;
     float m_bufscale = 1;
     int m_cur = 0;
-    QInfiniteBuffer* m_input;
+   // QInfiniteBuffer* m_input;
+    QBuffer* m_input;
     void CopyBuffer();
     void Init(int samplerate, float dur);
 
@@ -75,6 +76,8 @@ public:
     OKMemory m_pram, m_vram;
     RAudio m_audio;
     Mos6502 m_cpu;
+
+
     OKVC m_okvc;
     SID m_sid;
 

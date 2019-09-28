@@ -9,16 +9,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     SetDarkPalette();
     connect(&m_computer,SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(OnQuit()));
+
     m_computer.PowerOn();
 
 
     m_computer.start();
+
+    ui->txtStatus->setVisible(false);
+    ui->txtOutput->setVisible(false);
+
+    Fit();
+
 }
 
 MainWindow::~MainWindow()
 {
-    m_computer.m_abort = true;
-    QThread::sleep(150);
+    onQuit();
     delete ui;
 }
 
@@ -136,8 +143,19 @@ void MainWindow::SetDarkPalette() {
 
 }
 
+void MainWindow::Fit()
+{
+    bool visible = ui->txtOutput->isVisible();
+    ui->hlMain->setStretch(0,1);
+    ui->hlMain->setStretch(1,1*visible);
+    setFixedSize(700*(visible+1),800);
+
+}
+
 void MainWindow::onEmitOutput()
 {
+    if (m_computer.m_abort)
+        return;
     m_computer.m_okvc.GenerateOutputSignal();
     m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen);
 
@@ -160,4 +178,19 @@ void MainWindow::on_btnRun_clicked()
 void MainWindow::on_pushButton_clicked()
 {
     m_computer.m_run = false;
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+
+    ui->txtStatus->setVisible(!ui->txtStatus->isVisible());
+    ui->txtOutput->setVisible(!ui->txtOutput->isVisible());
+    Fit();
+}
+
+void MainWindow::onQuit()
+{
+    m_computer.m_abort = true;
+    m_computer.msleep(250);
+    QThread::msleep(250);
 }

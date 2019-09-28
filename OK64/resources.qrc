@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>resources/text/opcodes.txt</file>
+        <file>resources/rom/font.bin</file>
     </qresource>
 </RCC>

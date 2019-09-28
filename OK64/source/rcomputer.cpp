@@ -47,7 +47,7 @@ void RComputer::Run()
 void RComputer::PowerOn()
 {
     m_pram.Init(65536);
-    m_vram.Init(65536*4);
+    m_vram.Init(65536*16);
     m_cpu.Initialize(&m_pram);
     m_cpu.LoadOpcodes();
     m_okvc.Init(&m_pram, &m_vram);
@@ -61,9 +61,10 @@ int RComputer::LoadProgram(QString fn)
     int pos = blob[1]*0x100 + blob[0];
     //qDebug() << blob.size();
 
-    int programSize = min(blob.size()+pos,65535);
+    int programSize = min(blob.size()+pos,65536);
     blob.remove(0,2);
     for (int i=0;i<programSize;i++)
+        if (i+pos<0xFF00 || i+pos>0xFFFF)
         m_pram.set(i+pos,blob[i]);
 
     blob.remove(0,programSize);
@@ -89,34 +90,33 @@ void RComputer::run()
         m_okvc.PrepareRaster();
         timer.start();
         if (m_run) {
-/*            m_audio.audio->stop();
-            m_audio.m_input->reset();
-            m_audio.audio->start();*/
             m_cpu.ClearCycles();
-            while (m_cpu.m_cycles< m_cyclesPerFrame && m_okvc.state.m_waitForVSYNC==false && m_run)
+            while (m_cpu.m_cycles< m_cyclesPerFrame && m_okvc.state.m_waitForVSYNC==false && m_run && !m_abort)
                 Step();
 
-            //            if (m_cpu.m_cycles>= m_cyclesPerFrame)
-//                qDebug() << "CAP at" << m_cpu.m_cycles << " of " <<m_cyclesPerFrame;
-
         }
+
         m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
 
         m_time++;
         m_okvc.m_backbuffer = QImage(m_okvc.m_img);
         m_audio.CopyBuffer();
-        usleep(m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0);
-        emit emitAudio();
-//        qDebug() << timer.nsecsElapsed()/1000.0;
-        //m_okvc.GenerateOutputSignal();
+        if (!m_abort) {
+            usleep(m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0);
+            emit emitAudio();
 
-        emit emitOutput();
+            emit emitOutput();
+        }
+
     }
     m_audio.done = true;
+ //   qDebug() << "Thread DONE";
 }
 
 void RComputer::onAudio()
 {
+    if (m_abort)
+        return;
     for (int i=0;i<0x20;i++)
         m_sid.write(i,m_pram.get(0xD400+i));
 //    int s = m_audio.m_size;
@@ -127,6 +127,9 @@ void RComputer::onAudio()
 //    qDebug() << pp;
 
     for (int i=0;i<s;i++) {
+        if (m_abort)
+            return;
+
         m_sid.clock(csdelta);
         int v = m_sid.output();
         float sample = (float)v/65536.0;
@@ -183,7 +186,7 @@ void RAudio::Init(int samplerate, float dur) {
 
     audio = new QAudioOutput(audioFormat, this);
 //    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-      m_input = new QInfiniteBuffer(&m_tempSoundBuffer,nullptr);
+      m_input = new QBuffer(&m_tempSoundBuffer,nullptr);
       m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
 
       audio->start(m_input);

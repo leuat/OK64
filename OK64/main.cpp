@@ -27,13 +27,12 @@ int main(int argc, char *argv[])
         w.m_computer.m_run =true;
     }
     else {
-        w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/testline.prg");
-        w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/testline.sym");
+        w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/testfont.prg");
+        w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/testfont.sym");
 
 //        w.m_computer.m_cpu.m_breakPoints.append(0x133b);
 //        w.m_computer.m_cpu.m_breakPoints.append(0x1179);
     }
     w.show();
-
     return a.exec();
 }

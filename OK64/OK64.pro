@@ -56,6 +56,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 
 DISTFILES += \
+    resources/rom/font.bin \
     resources/text/opcodes.txt
 
 RESOURCES += \

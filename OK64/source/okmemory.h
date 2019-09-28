@@ -6,8 +6,8 @@
 
 class OKMemory
 {
-    QByteArray m_memory;
 public:
+    QByteArray m_memory;
     void Init(int size);
     uchar get(int pos);
     void set(int pos, uchar v);

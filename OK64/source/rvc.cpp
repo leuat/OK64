@@ -1,7 +1,25 @@
 #include "source/rvc.h"
+#include <QFile>
 
 OKVC::OKVC()
 {
+
+}
+
+void OKVC::LoadRom(QString file, int pos)
+{
+    QFile f(file);
+    f.open(QFile::ReadOnly);
+    QByteArray blob = f.readAll();
+    f.close();
+    for (int i=0;i<blob.size();i++) {
+        int p = i+pos;
+        if (p<0x10000)
+            state.m_pram->set(p,blob[i]);
+        else
+            state.m_vram->set(p-0x10000,blob[i]);
+    }
+
 
 }
 
@@ -20,12 +38,13 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram)
 //        if ((k&1)==1) dd=15;
         state.m_palette[color] = QColor((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
     }
+//    qDebug() << QString::number(state.m_pram->get(p_fontBank));
+    LoadRom(":resources/rom/font.bin",0xF0000);
 
-/*    for (int color=0;color<256;color++) {
-        int c = color&63;
-        m_palette[color] = QColor((c&0b00000011)*64,((c&0b00001100))*16,(c&0b00110000)*4);
-    }
-*/
+    state.m_pram->set(p_fontBank,0x0F);
+    state.m_pram->set(p_fontSizeX,0x08);
+    state.m_pram->set(p_fontSizeY,0x08);
+
 }
 
 void OKVC::PutPixel(int x, int y, uchar color)
@@ -84,11 +103,46 @@ void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
         }
 }
 
+void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int py)
+{
+    int base = (state.m_pram->get(p_fontBank)-1)*0x10000;
+    int width = 256/fontsizeX;
+    int x = chr % (width);
+    int y = (int)(chr/width);
+    int px1 = x*fontsizeX;
+    int py1 = y*fontsizeY;
+    int px2 = px;
+    int py2 = py;
+//    qDebug() << "Base: "<<QString::number(base,16);
+#pragma omp parallel for
+    for (int yy=0;yy<fontsizeY;yy++)
+        for (int xx=0;xx<fontsizeX;xx++) {
+            int sx = xx+px1;
+            int sy = yy+py1;
+
+            int tx = xx+px2;
+            int ty = yy+py2;
+            uchar c = 0;
+
+            c = state.m_vram->get(base + sx+sy*256);
+
+
+            if (c!=0) {
+                state.m_vram->set(tx+ty*256,col);
+
+//            if (ty<256) // in Screen ram
+                if (tx>=0 && tx<256 && ty>=0 && ty<256)
+                    m_img.setPixelColor(tx,ty,QColor(col,0,0));
+            }
+        }
+
+}
+
 
 
 void OKVC::Update()
 {
-    state.m_pram->set(p_time,rand()%255);//m_memory->at(p_time)+11;
+    state.m_pram->set(p_time,rand()%255);
     if (get(p_exec)==p_pixel) {
         PutPixel(get(p_p1_x), get(p_p1_y),get(p_p1_c));
     }
@@ -106,6 +160,9 @@ void OKVC::Update()
     }
     if (get(p_exec)==p_blit) {
         Blit(get(p_p1_x), get(p_p1_y), get(p_p1_c), get(p_p1_3),get(p_p2_x),get(p_p2_y));
+    }
+    if (get(p_exec)==p_blitFont) {
+        BlitFont(get(p_fontSizeX), get(p_fontSizeY), get(p_p1_x), get(p_p1_y),get(p_p1_c),get(p_p1_3));
     }
     set(p_exec,0);
 

@@ -11,6 +11,8 @@ void Mos6502::Initialize(OKMemory* pram)
     m = pram;
     m_impl = new mos6502(BusRead, BusWrite);
     m_impl->pc = 0x400;
+
+//    initcpu(0x400,0,0,0);
 }
 
 QString Mos6502::GetAddressOrSymbol(ushort pos)
@@ -136,6 +138,10 @@ void Mos6502::SetPC(int i)
 bool Mos6502::Eat()
 {
     m_impl->Run(1);
+//    exit(1);
+//    runcpu();
+//    m->m_memory = QByteArray((char*)mem);
+//    memcpy(m->m_memory.data(), mem,65535);
     m_cycles+=1;
     r.a = m_impl->A;
     r.x = m_impl->X;
@@ -671,6 +677,8 @@ void Mos6502::Execute()
 {
     SetPC(Constants::c.programStartAddress);
     bool ok = true;
+
+//    memcpy(mem,m->m_memory.data(),65535);
     while (ok)
         ok = Eat();
 }

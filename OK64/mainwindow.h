@@ -25,7 +25,7 @@ public:
     void UpdateStatus();
     void keyPressEvent(QKeyEvent *e);
     void SetDarkPalette();
-
+    void Fit();
 
 private:
     Ui::MainWindow *ui;
@@ -36,6 +36,8 @@ private slots:
     void on_btnNext_clicked();
     void on_btnRun_clicked();
     void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
+    void onQuit();
 };
 
 #endif // MAINWINDOW_H

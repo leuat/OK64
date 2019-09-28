@@ -1,5 +1,5 @@
 #include "okmemory.h"
-
+#include <QDebug>
 void OKMemory::Init(int size)
 {
     m_memory.resize(size);
@@ -15,6 +15,7 @@ uchar OKMemory::get(int pos)
 
 void OKMemory::set(int pos, uchar v)
 {
+//    qDebug() << " Setting " << QString::number(pos,16) << QString::number(v);
     if (pos>=m_memory.count())
         return;
     m_memory[pos] = v;
