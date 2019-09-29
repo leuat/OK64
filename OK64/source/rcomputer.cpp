@@ -117,6 +117,8 @@ void RComputer::onAudio()
 {
     if (m_abort)
         return;
+
+//    return;
     for (int i=0;i<0x20;i++)
         m_sid.write(i,m_pram.get(0xD400+i));
 //    int s = m_audio.m_size;
@@ -125,7 +127,7 @@ void RComputer::onAudio()
     cycle_count csdelta = round((float)m_mhz / ((float)m_khz));
 //    int pp = m_audio.m_input->pos();
 //    qDebug() << pp;
-
+//#pragma omp parallell for
     for (int i=0;i<s;i++) {
         if (m_abort)
             return;
@@ -145,6 +147,7 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+2] = byte02;
         m_audio.m_soundBuffer[j+3] = byte03;
     }
+
     if (m_audio.m_cur++==m_audio.m_bufscale) {
         m_audio.m_cur = 0;
     }
