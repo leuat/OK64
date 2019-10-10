@@ -19,6 +19,7 @@ public:
     ~MainWindow();
     RComputer m_computer;
     QStringList m_commands;
+    int m_count=0;
     int m_prevPC;
     float m_workLoad;
     void DisplayProgram();

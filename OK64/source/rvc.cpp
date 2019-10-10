@@ -44,6 +44,9 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram)
     state.m_pram->set(p_fontBank,0x0F);
     state.m_pram->set(p_fontSizeX,0x08);
     state.m_pram->set(p_fontSizeY,0x08);
+    state.m_pram->set(p_borderColor,0x0);
+    state.m_pram->set(p_borderWidth,0x10);
+    state.m_pram->set(p_borderHeight,0x10);
 
 }
 
@@ -81,7 +84,7 @@ void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
     int py1 = y1*16;
     int px2 = x2;
     int py2 = y2;
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int yy=0;yy<h;yy++)
         for (int xx=0;xx<w;xx++) {
             int sx = xx+px1;
@@ -114,7 +117,7 @@ void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int 
     int px2 = px;
     int py2 = py;
 //    qDebug() << "Base: "<<QString::number(base,16);
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int yy=0;yy<fontsizeY;yy++)
         for (int xx=0;xx<fontsizeX;xx++) {
             int sx = xx+px1;
@@ -171,6 +174,7 @@ void OKVC::Update()
 
 void OKVC::VRAMtoScreen()
 {
+//    QRgb* s =
     for (int y=0;y<256;y++)
         for (int x=0;x<256;x++)
             m_img.setPixelColor(x,y,QColor(state.m_vram->get(x+y*256),0,0));
@@ -179,10 +183,34 @@ void OKVC::VRAMtoScreen()
 
 void OKVC::GenerateOutputSignal()
 {
-#pragma omp parallell for
-    for (int y=0;y<256;y++)
-        for (int x=0;x<256;x++) {
-            m_screen.setPixelColor(x,y,state.m_palette[m_backbuffer.pixelColor(x,y).red()]);
+    int bw  = state.m_pram->get(p_borderWidth);
+    int bh  = state.m_pram->get(p_borderHeight);
+    int bc  = state.m_pram->get(p_borderColor);
+    /*   for (int y=0;y<m_screen.height();y++)
+//#pragma omp parallel for
+        for (int x=0;x<m_screen.width();x++) {
+            int col = m_img.pixelColor(x,y).red();
+            if (y<bh || y>m_screen.height()-bh)
+                col = bc;
+            if (x<bw || x>m_screen.width()-bw)
+                col = bc;
+            m_screen.setPixelColor(x,y,state.m_palette[col]);
+        }
+        */
+
+    QRgb *screen = (QRgb *) m_screen.bits();
+    QRgb *back = (QRgb *) m_img.bits();
+    int w = m_screen.width();
+    for (int y=0;y<m_screen.height();y++)
+//        #pragma omp parallel for
+        for (int x=0;x<w;x++) {
+            int col = QColor(back[y*w+x]).red();
+            if (y<bh || y>m_screen.height()-bh)
+                col = bc;
+            if (x<bw || x>w-bw)
+                col = bc;
+
+            screen[y*w+x] = state.m_palette[col].rgba();
         }
 }
 

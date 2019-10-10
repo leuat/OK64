@@ -154,14 +154,21 @@ void MainWindow::Fit()
 
 void MainWindow::onEmitOutput()
 {
+//    qDebug() << m_count;
     if (m_computer.m_abort)
         return;
-    m_computer.m_okvc.GenerateOutputSignal();
-    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen);
+    m_computer.m_outputBusy=true;
+//    m_computer.m_okvc.GenerateOutputSignal();
+    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen, Qt::AutoColor);
 
     ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
-    UpdateStatus();
-    DisplayProgram();
+    if (ui->txtStatus->isVisible() && ((m_count&3)==0)) {
+        UpdateStatus();
+        DisplayProgram();
+    }
+    m_count++;
+    m_computer.m_outputBusy=false;
+
 }
 
 void MainWindow::on_btnNext_clicked()

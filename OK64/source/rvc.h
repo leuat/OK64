@@ -26,6 +26,9 @@ public:
     const int p_fontBank = 0xFFEE;
     const int p_fontSizeX = 0xFFED;
     const int p_fontSizeY = 0xFFEC;
+    const int p_borderWidth = 0xFFEB;
+    const int p_borderHeight = 0xFFEA;
+    const int p_borderColor = 0xFFE9;
 
     const int p_p1_x = 0xFF00;
     const int p_p1_y = 0xFF01;

@@ -82,13 +82,19 @@ int RComputer::LoadProgram(QString fn)
 }
 void RComputer::run()
 {
+    Execute();
 
+}
+
+void RComputer::Execute()
+{
     sleep((1/100.0));
+    onAudio();
+    int time = 0;
     while (!m_abort) {
-
         QElapsedTimer timer;
-        m_okvc.PrepareRaster();
         timer.start();
+        m_okvc.PrepareRaster();
         if (m_run) {
             m_cpu.ClearCycles();
             while (m_cpu.m_cycles< m_cyclesPerFrame && m_okvc.state.m_waitForVSYNC==false && m_run && !m_abort)
@@ -99,18 +105,32 @@ void RComputer::run()
         m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
 
         m_time++;
-        m_okvc.m_backbuffer = QImage(m_okvc.m_img);
-        m_audio.CopyBuffer();
+        //m_okvc.m_backbuffer = QImage(m_okvc.m_img);
         if (!m_abort) {
-            usleep(m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0);
-            emit emitAudio();
+            time++;
+            if ((time&1)==1)
+                m_okvc.GenerateOutputSignal();
 
-            emit emitOutput();
+            m_soundPos = ((QInfiniteBuffer*)m_audio.m_input)->getPos();
+            onAudio();
+            int slp = m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0;
+            if (slp>0)
+                usleep(slp);
+            else qDebug() << "frame skip at "<<time ;
+
+            if ((time&1)==0) {
+                if (!m_outputBusy) {
+                    emit emitOutput();
+                }
+            }
         }
 
+
+
     }
+
     m_audio.done = true;
- //   qDebug() << "Thread DONE";
+    //   qDebug() << "Thread DONE";
 }
 
 void RComputer::onAudio()
@@ -118,42 +138,43 @@ void RComputer::onAudio()
     if (m_abort)
         return;
 
+    m_audioAction=true;
+
 //    return;
     for (int i=0;i<0x20;i++)
         m_sid.write(i,m_pram.get(0xD400+i));
-//    int s = m_audio.m_size;
-    int s = m_audio.m_soundBuffer.count()/4;///50;
 //    qDebug() << s;
     cycle_count csdelta = round((float)m_mhz / ((float)m_khz));
 //    int pp = m_audio.m_input->pos();
 //    qDebug() << pp;
-//#pragma omp parallell for
-    for (int i=0;i<s;i++) {
-        if (m_abort)
-            return;
+//#pragma omp parallel for
+    for (int i=0;i<m_audio.m_size;i++) {
+//        if (m_abort)
+  //          return;
 
         m_sid.clock(csdelta);
         int v = m_sid.output();
         float sample = (float)v/65536.0;
- //       sample = sin((i)*(0.1*(sin(m_time/100.0)+1)))*0.1;
+//        sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
         char byte00 = *ptr;         // 1st byte
         char byte01 = *(ptr + 1);   // 2nd byte
         char byte02 = *(ptr + 2);   // 3rd byte
         char byte03 = *(ptr + 3);   // 4th byte
-        int j = i*4;// + m_audio.m_cur*4*s;
+        int j = (m_audio.m_size*4+ i*4 + m_soundPos)%(m_audio.m_size*4);// + m_audio.m_cur*4*s;
         m_audio.m_soundBuffer[j+0] = byte00;
         m_audio.m_soundBuffer[j+1] = byte01;
         m_audio.m_soundBuffer[j+2] = byte02;
         m_audio.m_soundBuffer[j+3] = byte03;
     }
 
-    if (m_audio.m_cur++==m_audio.m_bufscale) {
+/*    if (m_audio.m_cur++==m_audio.m_bufscale) {
         m_audio.m_cur = 0;
     }
-
+*/
 //    m_audio.CopyBuffer();
 
+    m_audioAction=false;
 
 }
 
@@ -169,7 +190,7 @@ void RAudio::Init(int samplerate, float dur) {
     float duration = dur;     // duration in seconds
     int n  = int(duration * sampleRate);   // number of data samples
 
-    m_size = n;
+    m_size = n*m_bufscale;
     m_soundBuffer.resize(n*4*m_bufscale);
     m_soundBuffer.fill(0);
     m_tempSoundBuffer.resize(n*4*m_bufscale);
@@ -189,9 +210,14 @@ void RAudio::Init(int samplerate, float dur) {
 
     audio = new QAudioOutput(audioFormat, this);
 //    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-      m_input = new QBuffer(&m_tempSoundBuffer,nullptr);
+//      m_input = new QInfiniteBuffer(&m_tempSoundBuffer,nullptr);
+      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
       m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
 
+/*      m_aThread.audio = audio;
+      m_aThread.buf = m_input;
+      m_aThread.start();
+      m_aThread.run();*/
       audio->start(m_input);
       connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 }
@@ -199,31 +225,20 @@ void RAudio::Init(int samplerate, float dur) {
 
 void RAudio::handleStateChanged(QAudio::State newState)
 {
-//    qDebug() << newState;
     if (newState==QAudio::StoppedState) {
-  //      qDebug() << "STOPPED";
+//        qDebug() << "STOPPED";
     }
 
     if (newState==QAudio::IdleState && !done) {
-//        qDebug() << "HERE" <<rand()%100;
-//        audio->stop();
-//        QThread::msleep(10);
-//        CopyBuffer();
-//        m_input->close();
-  //      m_input->open(QIODevice::ReadOnly);
-//        qDebug() << audio->
-            m_input->seek(0);
-  //      audio->start(m_input);
-//        m_soundBuffer.setRawData(m_tempSoundBuffer.ch);
-/*        for (int i=0;i<m_tempSoundBuffer.count();i++) {
-            m_soundBuffer[i]=m_tempSoundBuffer[i];
-        }*/
-//        exit(1);
-//        m_input->seek(0);
-//        m_input->start
-        //audio->start(m_input);
+//            qDebug()<< "IDLE";
+//          audio->reset();
+//            audio->setNotifyInterval(10000);
+//            audio->
+   //       m_input->seek(0);
+  //        audio->start(m_input);
     }
     if (done) {
+  //      qDebug() << "DONE";
         audio->stop();
         delete m_input;
         m_input = nullptr;
@@ -233,22 +248,20 @@ void RAudio::handleStateChanged(QAudio::State newState)
 qint64 QInfiniteBuffer::readData(char *output, qint64 maxlen)
 {
     qint64 outputpos=0;
-    const QByteArray &d=data();
-/*    memcpy(output, d.constData(),maxlen);
-    return maxlen;
-*/
-    do
-    {
-        qint64 sizetocopy=maxlen-outputpos;
-        if((maxlen-outputpos)>(d.size()-m_pos))
-            sizetocopy=d.size()-m_pos;
+       const QByteArray &d=data();
 
-        memcpy(output, d.constData() +m_pos,sizetocopy);
-        outputpos+=sizetocopy;
-        m_pos+=sizetocopy;
-        if(m_pos>=d.size())
-            m_pos=0;
-    } while(outputpos<maxlen);
+       do
+       {
+           qint64 sizetocopy=maxlen-outputpos;
+           if((maxlen-outputpos)>(d.size()-m_pos))
+               sizetocopy=d.size()-m_pos;
+           memcpy(output,d.constData()+m_pos,sizetocopy);
+           outputpos+=sizetocopy;
+           m_pos+=sizetocopy;
+           if(m_pos>=d.size())
+               m_pos=0;
+       } while(outputpos<maxlen);
 
-    return maxlen;
+       return maxlen;
 }
+
