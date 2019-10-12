@@ -29,6 +29,9 @@ public:
     const int p_borderWidth = 0xFFEB;
     const int p_borderHeight = 0xFFEA;
     const int p_borderColor = 0xFFE9;
+    const int p_inputKey = 0xFFE8;
+
+    const int p_inputInterrupt = 0xFFF8;
 
     const int p_p1_x = 0xFF00;
     const int p_p1_y = 0xFF01;
@@ -48,6 +51,7 @@ public:
     const int p_palette = 5;
     const int p_blit = 6;
     const int p_blitFont = 7;
+    const int p_rect = 8;
 
     OKVC();
     QImage m_img;
@@ -67,6 +71,7 @@ public:
     void DrawLine(int x1, int y1, int x2, int y2, uchar color);
     void Blit(int x1, int y1, int x2, int y2, int w, int h);
     void BlitFont(int fontsizeX, int fontsizeY, int c, int col, int px, int py);
+    void Rect(int x1, int y1, int w, int h,uchar c);
     void Update();
     void VRAMtoScreen();
     void GenerateOutputSignal();

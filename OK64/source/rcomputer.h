@@ -90,7 +90,7 @@ public:
     int m_khz = 44100;
     int m_cyclesPerFrame = m_mhz/m_fps;
     int m_time = 0;
-
+    int m_currentKey = 0;
     bool m_audioAction = false;
     bool m_outputBusy = false;
 
@@ -109,7 +109,8 @@ public:
     void PowerOn();
     int LoadProgram(QString fn);
 
-
+    void setKey(int k) {m_currentKey = k;}
+    void HandleInput();
     void run() override;
     void Execute();
 public slots:

@@ -164,6 +164,8 @@ private:
 	static const uint16_t rstVectorL = 0xFFFC;
 	static const uint16_t nmiVectorH = 0xFFFB;
 	static const uint16_t nmiVectorL = 0xFFFA;
+    static const uint16_t inpVectorH = 0xFFF9;
+    static const uint16_t inpVectorL = 0xFFF8;
 
 	// read/write callbacks
 	typedef void (*BusWrite)(uint16_t, uint8_t);
@@ -179,7 +181,8 @@ public:
 
 	mos6502(BusRead r, BusWrite w);
 	void NMI();
-	void IRQ();
+    void INP();
+    void IRQ();
 	void Reset();
 	void Run(uint32_t n);
 };

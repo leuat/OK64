@@ -12,6 +12,8 @@ RComputer::RComputer()
 */
 }
 
+
+
 void RComputer::Step()
 {
     int i=0;
@@ -80,6 +82,16 @@ int RComputer::LoadProgram(QString fn)
 
     return pos;
 }
+
+void RComputer::HandleInput()
+{
+    if (m_currentKey!=0) {
+        qDebug() << "Key pressed:  " << m_currentKey;
+        m_pram.set(m_okvc.p_inputKey,m_currentKey);
+        m_currentKey=0;
+        m_cpu.m_impl->INP();
+    }
+}
 void RComputer::run()
 {
     Execute();
@@ -92,6 +104,7 @@ void RComputer::Execute()
     onAudio();
     int time = 0;
     while (!m_abort) {
+        HandleInput();
         QElapsedTimer timer;
         timer.start();
         m_okvc.PrepareRaster();

@@ -20,7 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtOutput->setVisible(false);
 
     Fit();
-
+    //uielement->setFocusPolicy(Qt::NoFocus);
+    ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
 }
 
 MainWindow::~MainWindow()
@@ -118,6 +119,12 @@ void MainWindow::UpdateStatus()
 
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
+    if (e->text().count()==0)
+        return;
+    char c = e->key();
+    if (e->text().count()>0)
+        c = e->text().at(0).toLatin1();
+    m_computer.setKey(c);
 }
 
 void MainWindow::SetDarkPalette() {
@@ -148,7 +155,7 @@ void MainWindow::Fit()
     bool visible = ui->txtOutput->isVisible();
     ui->hlMain->setStretch(0,1);
     ui->hlMain->setStretch(1,1*visible);
-    setFixedSize(700*(visible+1),800);
+    setFixedSize(800*(visible+1),800);
 
 }
 

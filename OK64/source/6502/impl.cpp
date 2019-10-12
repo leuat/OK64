@@ -713,6 +713,20 @@ void mos6502::IRQ()
 	return;
 }
 
+void mos6502::INP()
+{
+    if(!IF_INTERRUPT())
+    {
+        SET_BREAK(0);
+        StackPush((pc >> 8) & 0xFF);
+        StackPush(pc & 0xFF);
+        StackPush(status);
+        SET_INTERRUPT(1);
+        pc = (Read(inpVectorH) << 8) + Read(inpVectorL);
+    }
+    return;
+}
+
 void mos6502::NMI()
 {
 	SET_BREAK(0);

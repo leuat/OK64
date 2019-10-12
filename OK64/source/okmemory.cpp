@@ -13,6 +13,14 @@ uchar OKMemory::get(int pos)
     return m_memory[pos];
 }
 
+ushort OKMemory::getWord(int pos)
+{
+    if (pos>=m_memory.count())
+        return 0;
+    return (m_memory[pos]<<8) | m_memory[pos+1];
+}
+
+
 void OKMemory::set(int pos, uchar v)
 {
 //    qDebug() << " Setting " << QString::number(pos,16) << QString::number(v);

@@ -106,6 +106,23 @@ void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
         }
 }
 
+void OKVC::Rect(int x1, int y1, int w, int h,uchar c)
+{
+    int px1 = x1;
+    int py1 = y1;
+    for (int yy=0;yy<h;yy++)
+        for (int xx=0;xx<w;xx++) {
+            int sx = xx+px1;
+            int sy = yy+py1;
+
+//            state.m_vram->set(tx+ty*256,c);
+
+//            if (ty<256) // in Screen ram
+  //          if (tx>=0 && tx<256 && ty>=0 && ty<256)
+                m_img.setPixelColor(sx,sy,QColor(c,0,0));
+        }
+}
+
 void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int py)
 {
     int base = (state.m_pram->get(p_fontBank)-1)*0x10000;
@@ -153,7 +170,7 @@ void OKVC::Update()
         DrawLine(get(p_p1_x), get(p_p1_y),get(p_p2_x), get(p_p2_y),    get(p_p1_c));
     }
     if (get(p_exec)==p_clearscreen) {
-        m_img.fill(state.m_palette[get(p_p1_c)]);
+        m_img.fill(QColor(get(p_p1_c),0,0));
     }
     if (get(p_exec)==p_circlefill) {
         DrawCircle(get(p_p1_x), get(p_p1_y),get(p_p1_c),get(p_p1_3),true);
@@ -166,6 +183,9 @@ void OKVC::Update()
     }
     if (get(p_exec)==p_blitFont) {
         BlitFont(get(p_fontSizeX), get(p_fontSizeY), get(p_p1_x), get(p_p1_y),get(p_p1_c),get(p_p1_3));
+    }
+    if (get(p_exec)==p_rect) {
+        Rect(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x) );
     }
     set(p_exec,0);
 
