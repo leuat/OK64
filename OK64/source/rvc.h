@@ -30,6 +30,8 @@ public:
     const int p_borderHeight = 0xFFEA;
     const int p_borderColor = 0xFFE9;
     const int p_inputKey = 0xFFE8;
+    const int p_fileLocation = 0xFF20;
+
 
     const int p_inputInterrupt = 0xFFF8;
 
@@ -52,8 +54,16 @@ public:
     const int p_blit = 6;
     const int p_blitFont = 7;
     const int p_rect = 8;
+    const int p_resetFileList = 9;
+    const int p_nextFile = 10;
+    const int p_loadFile = 11;
 
     OKVC();
+    QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";
+
+    void InsertString(QString s, int pos);
+    int m_currentFile = 0;
+
     QImage m_img;
     QImage m_backbuffer;
     QImage m_screen;
@@ -63,6 +73,12 @@ public:
         state.m_waitForVSYNC = false;
         state.m_pram->set(p_vsync,0);
     }
+    QStringList m_listFiles;
+
+    void ResetFileList();
+    void ReadNextFile();
+    void LoadFile();
+
 
     void LoadRom(QString file, int pos);
     void Init(OKMemory* pram, OKMemory* vram);

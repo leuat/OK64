@@ -1,7 +1,41 @@
 #include "source/rvc.h"
 #include <QFile>
-
+#include <QDirIterator>
 OKVC::OKVC()
+{
+
+}
+
+void OKVC::InsertString(QString s, int pos)
+{
+    for (int i=0;i<s.length();i++)
+        state.m_pram->set(pos++,s[i].toLatin1());
+    state.m_pram->set(pos,0);
+}
+
+void OKVC::ResetFileList()
+{
+    m_listFiles.clear();
+    m_currentFile = 0;
+    InsertString("               ",p_fileLocation);
+    QDirIterator it(m_currentDir, QStringList() << "*.prg", QDir::Files);
+    while (it.hasNext()) {
+        QString s = it.next();
+        m_listFiles.append(s.split("/").last());
+//        qDebug() << it.next();
+    }
+    InsertString(m_listFiles[m_currentFile],p_fileLocation);
+}
+
+void OKVC::ReadNextFile()
+{
+    m_currentFile++;
+    if (m_currentFile<m_listFiles.count())
+        InsertString(m_listFiles[m_currentFile],p_fileLocation);
+    else InsertString("",p_fileLocation);
+}
+
+void OKVC::LoadFile()
 {
 
 }
@@ -187,6 +221,15 @@ void OKVC::Update()
     if (get(p_exec)==p_rect) {
         Rect(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x) );
     }
+    if (get(p_exec)==p_resetFileList)
+        ResetFileList();
+
+    if (get(p_exec)==p_nextFile)
+        ReadNextFile();
+
+    if (get(p_exec)==p_loadFile)
+        LoadFile();
+
     set(p_exec,0);
 
     state.m_waitForVSYNC = (get(p_vsync)==1);
