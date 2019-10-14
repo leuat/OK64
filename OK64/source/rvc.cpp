@@ -1,30 +1,93 @@
 #include "source/rvc.h"
 #include <QFile>
-
+#include <QDirIterator>
 OKVC::OKVC()
 {
 
 }
 
-void OKVC::LoadRom(QString file, int pos)
+void OKVC::InsertString(QString s, int pos)
 {
-    QFile f(file);
-    f.open(QFile::ReadOnly);
-    QByteArray blob = f.readAll();
-    f.close();
-    for (int i=0;i<blob.size();i++) {
-        int p = i+pos;
-        if (p<0x10000)
-            state.m_pram->set(p,blob[i]);
-        else
-            state.m_vram->set(p-0x10000,blob[i]);
+    for (int i=0;i<s.length();i++)
+        state.m_pram->set(pos++,s[i].toLatin1());
+    state.m_pram->set(pos,0);
+}
+
+void OKVC::ResetFileList()
+{
+    m_listFiles.clear();
+    m_currentFile = 0;
+    InsertString("               ",p_fileLocation);
+    QDirIterator it(m_currentDir, QStringList() << "*.prg", QDir::Files);
+    while (it.hasNext()) {
+        QString s = it.next();
+        m_listFiles.append(s.split("/").last());
+//        qDebug() << it.next();
     }
+    InsertString(m_listFiles[m_currentFile],p_fileLocation);
+}
+
+void OKVC::ReadNextFile()
+{
+    m_currentFile++;
+    if (m_currentFile<m_listFiles.count())
+        InsertString(m_listFiles[m_currentFile],p_fileLocation);
+    else InsertString("",p_fileLocation);
+}
+
+void OKVC::LoadFile()
+{
+    QString f = "";
+    int pos = p_fileLocation;
+    while (state.m_pram->get(pos)!=0){
+        f+=QChar(state.m_pram->get(pos));
+        pos++;
+    }
+    LoadRom(m_currentDir + f,0x400,true);
+//    state.m_impl->Run(0x400);
+    state.m_impl->pc = 0x400;
+
+}
+
+void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
+{
+    QFile file(fn);
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QByteArray blob = file.readAll();
+    int pos = startpos;
+    if (useHeader) {
+        pos = blob[1]*0x100 + blob[0];
+        blob.remove(0,2);
+    }
+//    qDebug() << "LOADING TO : " <<QString::number(pos,16);
+    int programSize = min(blob.size()+pos,65536);
+
+    if (startpos<65536) {
+        for (int i=0;i<programSize;i++)
+            if (i+pos<0xFE00 || i+pos>0xFFFF)
+                state.m_pram->set(i+pos,blob[i]);
+
+        blob.remove(0,programSize);
+    }
+    if (pos<65536)
+        pos = 0;
+    if (blob.size()>0) {
+        for (int i=0;i<blob.size();i++)
+            state.m_vram->set(i+pos,blob[i]);
+        qDebug() << "HERE " << fn << QString::number(pos,16);
+
+    }
+//    LoadRom(":resources/rom/font.bin",0xF0000,false);
+
+//    m_okvc.LoadRom(fn,0x400,true);
+  //  m_okvc.VRAMtoScreen();
 
 
 }
 
-void OKVC::Init(OKMemory* pram, OKMemory* vram)
+void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
 {
+    state.m_impl = imp;
     state.m_pram = pram;
     state.m_vram = vram;
     m_img = QImage(256,256,QImage::Format_RGB32);
@@ -39,7 +102,7 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram)
         state.m_palette[color] = QColor((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
     }
 //    qDebug() << QString::number(state.m_pram->get(p_fontBank));
-    LoadRom(":resources/rom/font.bin",0xF0000);
+    LoadRom(":resources/rom/font.bin",0xF0000,false);
 
     state.m_pram->set(p_fontBank,0x0F);
     state.m_pram->set(p_fontSizeX,0x08);
@@ -125,7 +188,7 @@ void OKVC::Rect(int x1, int y1, int w, int h,uchar c)
 
 void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int py)
 {
-    int base = (state.m_pram->get(p_fontBank)-1)*0x10000;
+    int base = (state.m_pram->get(p_fontBank))*0x10000;
     int width = 256/fontsizeX;
     int x = chr % (width);
     int y = (int)(chr/width);
@@ -187,6 +250,15 @@ void OKVC::Update()
     if (get(p_exec)==p_rect) {
         Rect(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x) );
     }
+    if (get(p_exec)==p_resetFileList)
+        ResetFileList();
+
+    if (get(p_exec)==p_nextFile)
+        ReadNextFile();
+
+    if (get(p_exec)==p_loadFile)
+        LoadFile();
+
     set(p_exec,0);
 
     state.m_waitForVSYNC = (get(p_vsync)==1);

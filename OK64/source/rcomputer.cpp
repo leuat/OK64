@@ -53,12 +53,12 @@ void RComputer::PowerOn()
     m_vram.Init(65536*16);
     m_cpu.Initialize(&m_pram);
     m_cpu.LoadOpcodes();
-    m_okvc.Init(&m_pram, &m_vram);
+    m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
 }
 
 int RComputer::LoadProgram(QString fn)
 {
-    QFile file(fn);
+/*    QFile file(fn);
     if (!file.open(QIODevice::ReadOnly)) return 0;
     QByteArray blob = file.readAll();
     int pos = blob[1]*0x100 + blob[0];
@@ -71,17 +71,17 @@ int RComputer::LoadProgram(QString fn)
         m_pram.set(i+pos,blob[i]);
 
     blob.remove(0,programSize);
-//    qDebug() << blob.size();
     if (blob.size()>0) {
-  //      qDebug() << "VRAM size " << blob.size();
         for (int i=0;i<blob.size();i++)
             m_vram.set(i,blob[i]);
 
 
-    }
+    }*/
+    m_okvc.LoadRom(fn,0,true);
+
     m_okvc.VRAMtoScreen();
 
-    return pos;
+    return 0;
 }
 
 void RComputer::HandleInput()
