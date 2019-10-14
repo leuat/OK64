@@ -35,9 +35,10 @@ int main(int argc, char *argv[])
        w.m_computer.m_cpu.LoadSybols("D:/Dropbox/TRSE/Rhea/okcomputer.sym");
 #endif
 
-  /*      w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/kos.prg");
+#ifdef __linux__
+       w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/kos.prg");
         w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/kos.sym");
-*/
+#endif
 
 
         w.m_computer.m_run =true;
