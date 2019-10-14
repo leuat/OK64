@@ -7,7 +7,7 @@
 #include <QPainter>
 
 #include "source/okmemory.h"
-
+#include "source/6502/impl.h"
 
 class OKVC_State {
 public:
@@ -16,6 +16,8 @@ public:
 
     QVector<QColor> m_palette;
     OKMemory* m_pram, *m_vram;
+    mos6502* m_impl = nullptr;
+
 };
 
 class OKVC
@@ -80,8 +82,8 @@ public:
     void LoadFile();
 
 
-    void LoadRom(QString file, int pos);
-    void Init(OKMemory* pram, OKMemory* vram);
+    void LoadRom(QString file, int pos, bool stripHeader=false);
+    void Init(OKMemory* pram, OKMemory* vram, mos6502* imp);
     void PutPixel(int x, int y, uchar color);
     void DrawCircle(int x, int y, int radius, uchar color, bool fill);
     void DrawLine(int x1, int y1, int x2, int y2, uchar color);

@@ -37,28 +37,57 @@ void OKVC::ReadNextFile()
 
 void OKVC::LoadFile()
 {
-
-}
-
-void OKVC::LoadRom(QString file, int pos)
-{
-    QFile f(file);
-    f.open(QFile::ReadOnly);
-    QByteArray blob = f.readAll();
-    f.close();
-    for (int i=0;i<blob.size();i++) {
-        int p = i+pos;
-        if (p<0x10000)
-            state.m_pram->set(p,blob[i]);
-        else
-            state.m_vram->set(p-0x10000,blob[i]);
+    QString f = "";
+    int pos = p_fileLocation;
+    while (state.m_pram->get(pos)!=0){
+        f+=QChar(state.m_pram->get(pos));
+        pos++;
     }
+    LoadRom(m_currentDir + f,0x400,true);
+//    state.m_impl->Run(0x400);
+    state.m_impl->pc = 0x400;
+
+}
+
+void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
+{
+    QFile file(fn);
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QByteArray blob = file.readAll();
+    int pos = startpos;
+    if (useHeader) {
+        pos = blob[1]*0x100 + blob[0];
+        blob.remove(0,2);
+    }
+//    qDebug() << "LOADING TO : " <<QString::number(pos,16);
+    int programSize = min(blob.size()+pos,65536);
+
+    if (startpos<65536) {
+        for (int i=0;i<programSize;i++)
+            if (i+pos<0xFE00 || i+pos>0xFFFF)
+                state.m_pram->set(i+pos,blob[i]);
+
+        blob.remove(0,programSize);
+    }
+    if (pos<65536)
+        pos = 0;
+    if (blob.size()>0) {
+        for (int i=0;i<blob.size();i++)
+            state.m_vram->set(i+pos,blob[i]);
+        qDebug() << "HERE " << fn << QString::number(pos,16);
+
+    }
+//    LoadRom(":resources/rom/font.bin",0xF0000,false);
+
+//    m_okvc.LoadRom(fn,0x400,true);
+  //  m_okvc.VRAMtoScreen();
 
 
 }
 
-void OKVC::Init(OKMemory* pram, OKMemory* vram)
+void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
 {
+    state.m_impl = imp;
     state.m_pram = pram;
     state.m_vram = vram;
     m_img = QImage(256,256,QImage::Format_RGB32);
@@ -73,7 +102,7 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram)
         state.m_palette[color] = QColor((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
     }
 //    qDebug() << QString::number(state.m_pram->get(p_fontBank));
-    LoadRom(":resources/rom/font.bin",0xF0000);
+    LoadRom(":resources/rom/font.bin",0xF0000,false);
 
     state.m_pram->set(p_fontBank,0x0F);
     state.m_pram->set(p_fontSizeX,0x08);
@@ -159,7 +188,7 @@ void OKVC::Rect(int x1, int y1, int w, int h,uchar c)
 
 void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int py)
 {
-    int base = (state.m_pram->get(p_fontBank)-1)*0x10000;
+    int base = (state.m_pram->get(p_fontBank))*0x10000;
     int width = 256/fontsizeX;
     int x = chr % (width);
     int y = (int)(chr/width);
