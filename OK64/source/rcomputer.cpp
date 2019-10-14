@@ -5,7 +5,7 @@ RComputer::RComputer()
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
     //m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
-
+//    m_sid.
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
 /*    bool set_sampling_parameters(double clock_freq, sampling_method method,
                      double sample_freq, double pass_freq = -1,
@@ -130,6 +130,7 @@ void RComputer::Execute()
             int slp = m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0;
             if (slp>0)
                 usleep(slp);
+
             else qDebug() << "frame skip at "<<time ;
 
             if ((time&1)==0) {
