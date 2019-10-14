@@ -105,9 +105,11 @@ void RComputer::Execute()
     onAudio();
     int time = 0;
     while (!m_abort) {
-        HandleInput();
         QElapsedTimer timer;
         timer.start();
+        m_soundPos = 16+((QInfiniteBuffer*)m_audio.m_input)->getPos();
+        onAudio();
+        HandleInput();
         m_okvc.PrepareRaster();
         if (m_run) {
             m_cpu.ClearCycles();
@@ -125,19 +127,22 @@ void RComputer::Execute()
             if ((time&1)==1)
                 m_okvc.GenerateOutputSignal();
 
-            m_soundPos = ((QInfiniteBuffer*)m_audio.m_input)->getPos();
-            onAudio();
-            int slp = m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0;
-            if (slp>0)
-                usleep(slp);
-
-            else qDebug() << "frame skip at "<<time ;
+//            qDebug() << m_soundPos;
 
             if ((time&1)==0) {
                 if (!m_outputBusy) {
                     emit emitOutput();
                 }
             }
+
+            int slp = m_mhz/(float)m_fps - (float)timer.nsecsElapsed()/1000.0;
+
+            if (slp>0)
+                usleep(slp);
+
+
+            else qDebug() << "frame skip at "<<time ;
+
         }
 
 
@@ -158,12 +163,14 @@ void RComputer::onAudio()
 //    return;
     for (int i=0;i<0x20;i++)
         m_sid.write(i,m_pram.get(0xD400+i));
+
 //    qDebug() << s;
-    cycle_count csdelta = round((float)m_mhz / ((float)m_khz));
+    cycle_count csdelta = 1.0*((float)m_mhz / ((float)m_khz));
 //    int pp = m_audio.m_input->pos();
 //    qDebug() << pp;
 //#pragma omp parallel for
-    for (int i=0;i<m_audio.m_size;i++) {
+    int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
+    for (int i=0;i<m_audio.m_size*2;i++) {
 //        if (m_abort)
   //          return;
 
@@ -176,7 +183,7 @@ void RComputer::onAudio()
         char byte01 = *(ptr + 1);   // 2nd byte
         char byte02 = *(ptr + 2);   // 3rd byte
         char byte03 = *(ptr + 3);   // 4th byte
-        int j = (m_audio.m_size*4+ i*4 + m_soundPos)%(m_audio.m_size*4);// + m_audio.m_cur*4*s;
+        int j = (size+ i*4 + m_soundPos)%(size);// + m_audio.m_cur*4*s;
         m_audio.m_soundBuffer[j+0] = byte00;
         m_audio.m_soundBuffer[j+1] = byte01;
         m_audio.m_soundBuffer[j+2] = byte02;
@@ -205,7 +212,7 @@ void RAudio::Init(int samplerate, float dur) {
     float duration = dur;     // duration in seconds
     int n  = int(duration * sampleRate);   // number of data samples
 
-    m_size = n*m_bufscale;
+    m_size = n;//*m_bufscale;
     m_soundBuffer.resize(n*4*m_bufscale);
     m_soundBuffer.fill(0);
     m_tempSoundBuffer.resize(n*4*m_bufscale);
