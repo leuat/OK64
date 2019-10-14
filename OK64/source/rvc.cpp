@@ -242,4 +242,5 @@ uchar OKVC::get(uint i)
 uchar OKVC::set(uint i, uchar j)
 {
     state.m_pram->set(i,j);
+    return j;
 }

@@ -4,7 +4,8 @@ RComputer::RComputer()
 {
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
-    m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
+    //m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
+
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
 /*    bool set_sampling_parameters(double clock_freq, sampling_method method,
                      double sample_freq, double pass_freq = -1,
