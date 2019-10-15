@@ -39,6 +39,7 @@ private slots:
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void onQuit();
+    void on_leDIr_textChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

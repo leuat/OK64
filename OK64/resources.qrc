@@ -3,5 +3,6 @@
         <file>resources/text/opcodes.txt</file>
         <file>resources/rom/font.bin</file>
         <file>resources/rom/kos.prg</file>
+        <file>resources/QTDark.stylesheet</file>
     </qresource>
 </RCC>

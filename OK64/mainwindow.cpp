@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    SetDarkPalette();
+    //SetDarkPalette();
     connect(&m_computer,SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(OnQuit()));
 
@@ -22,6 +22,18 @@ MainWindow::MainWindow(QWidget *parent) :
     Fit();
     //uielement->setFocusPolicy(Qt::NoFocus);
     ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
+    m_computer.m_okvc.m_currentDir = ui->leDIr->text();
+
+
+    QString StyleSheet = Util::loadTextFile(":resources/QTDark.stylesheet");
+/*    QFile File(":resources/QTDark.stylesheet");
+    File.open(QFile::ReadOnly);
+    QString StyleSheet = QLatin1String(File.readAll());
+
+    qDebug() << "EWTF " << StyleSheet;
+    qApp->setStyleSheet(StyleSheet);
+*/
+    qApp->setStyleSheet(StyleSheet);
 }
 
 MainWindow::~MainWindow()
@@ -147,7 +159,6 @@ void MainWindow::SetDarkPalette() {
     QApplication::setPalette(darkPalette);
     qApp->setStyleSheet("QToolTip { color: #ffE0C0; background-color: #000000; border: 0px; }");
 
-
 }
 
 void MainWindow::Fit()
@@ -207,4 +218,9 @@ void MainWindow::onQuit()
     m_computer.m_abort = true;
     m_computer.msleep(250);
     QThread::msleep(250);
+}
+
+void MainWindow::on_leDIr_textChanged(const QString &arg1)
+{
+    m_computer.m_okvc.m_currentDir = arg1;
 }

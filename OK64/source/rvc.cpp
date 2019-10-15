@@ -18,6 +18,9 @@ void OKVC::ResetFileList()
     m_listFiles.clear();
     m_currentFile = 0;
     InsertString("               ",p_fileLocation);
+    QDir d(m_currentDir);
+    if (!d.exists())
+        return;
     QDirIterator it(m_currentDir, QStringList() << "*.prg", QDir::Files);
     while (it.hasNext()) {
         QString s = it.next();
@@ -43,6 +46,9 @@ void OKVC::LoadFile()
         f+=QChar(state.m_pram->get(pos));
         pos++;
     }
+    qDebug() << m_currentDir + f;
+    if (!QFile::exists(m_currentDir + f))
+        return;
     LoadRom(m_currentDir + f,0x400,true);
 //    state.m_impl->Run(0x400);
     state.m_impl->pc = 0x400;
