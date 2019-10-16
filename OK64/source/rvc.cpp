@@ -3,7 +3,6 @@
 #include <QDirIterator>
 OKVC::OKVC()
 {
-
 }
 
 void OKVC::InsertString(QString s, int pos)
@@ -13,14 +12,36 @@ void OKVC::InsertString(QString s, int pos)
     state.m_pram->set(pos,0);
 }
 
+void OKVC::StripPramToVram()
+{
+    int sp = 256*state.m_pram->get(p_curStrip);
+    sp+=16*state.m_pram->get(p_dstPage)*256;
+    for (int i=0;i<256;i++)
+        state.m_vram->set(i+sp,
+                          state.m_pram->get(i+p_strip));
+}
+
+void OKVC::StripVramToPram()
+{
+    int sp = +256*state.m_pram->get(p_curStrip);
+    sp+=16*state.m_pram->get(p_dstPage)*256;
+    for (int i=0;i<256;i++)
+        state.m_pram->set(i+p_strip,
+            state.m_vram->get(i+sp));
+
+
+}
+
 void OKVC::ResetFileList()
 {
     m_listFiles.clear();
     m_currentFile = 0;
     InsertString("               ",p_fileLocation);
     QDir d(m_currentDir);
-    if (!d.exists())
+    if (!d.exists()) {
+        InsertString("Invalid file directory",p_fileLocation);
         return;
+    }
     QDirIterator it(m_currentDir, QStringList() << "*.prg", QDir::Files);
     while (it.hasNext()) {
         QString s = it.next();
@@ -46,12 +67,33 @@ void OKVC::LoadFile()
         f+=QChar(state.m_pram->get(pos));
         pos++;
     }
-    qDebug() << m_currentDir + f;
+//    qDebug() << m_currentDir + f;
     if (!QFile::exists(m_currentDir + f))
         return;
-    LoadRom(m_currentDir + f,0x400,true);
+
+    LoadRom(m_currentDir + f,0,true);
 //    state.m_impl->Run(0x400);
     state.m_impl->pc = 0x400;
+    Defaults();
+}
+
+bool OKVC::InputVectorSet()
+{
+    return (!(state.m_pram->get(p_inputInterrupt)==0 && state.m_pram->get(p_inputInterrupt+1)==0));
+}
+
+void OKVC::Defaults()
+{
+    state.m_pram->set(p_fontBank,0x0F);
+    state.m_pram->set(p_fontSizeX,0x08);
+    state.m_pram->set(p_fontSizeY,0x08);
+    state.m_pram->set(p_borderColor,0x0);
+    state.m_pram->set(p_borderWidth,0x10);
+    state.m_pram->set(p_borderHeight,0x10);
+    state.m_pram->set(p_srcPage,16);
+    state.m_pram->set(p_dstPage,0);
+    state.m_pram->set(p_inputInterrupt,0);
+    state.m_pram->set(p_inputInterrupt+1,0);
 
 }
 
@@ -65,22 +107,22 @@ void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
         pos = blob[1]*0x100 + blob[0];
         blob.remove(0,2);
     }
-//    qDebug() << "LOADING TO : " <<QString::number(pos,16);
     int programSize = min(blob.size()+pos,65536);
 
     if (startpos<65536) {
         for (int i=0;i<programSize;i++)
-            if (i+pos<0xFE00 || i+pos>0xFFFF)
+            if (i+pos<0xFE00)
                 state.m_pram->set(i+pos,blob[i]);
 
         blob.remove(0,programSize);
     }
+//    return;
     if (pos<65536)
         pos = 0;
     if (blob.size()>0) {
         for (int i=0;i<blob.size();i++)
             state.m_vram->set(i+pos,blob[i]);
-        qDebug() << "HERE " << fn << QString::number(pos,16);
+//        qDebug() << "HERE " << fn << QString::number(pos,16);
 
     }
 //    LoadRom(":resources/rom/font.bin",0xF0000,false);
@@ -96,6 +138,10 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
     state.m_impl = imp;
     state.m_pram = pram;
     state.m_vram = vram;
+    srand(time(nullptr));
+//    qDebug() << "RAND" << (rand()%256);
+//    m_rand = QRandomGenerator::system();
+
     m_img = QImage(256,256,QImage::Format_RGB32);
     m_backbuffer = QImage(256,256,QImage::Format_RGB32);
     m_screen = QImage(256,256,QImage::Format_RGB32);
@@ -109,13 +155,8 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
     }
 //    qDebug() << QString::number(state.m_pram->get(p_fontBank));
     LoadRom(":resources/rom/font.bin",0xF0000,false);
+    Defaults();
 
-    state.m_pram->set(p_fontBank,0x0F);
-    state.m_pram->set(p_fontSizeX,0x08);
-    state.m_pram->set(p_fontSizeY,0x08);
-    state.m_pram->set(p_borderColor,0x0);
-    state.m_pram->set(p_borderWidth,0x10);
-    state.m_pram->set(p_borderHeight,0x10);
 
 }
 
@@ -150,9 +191,9 @@ void OKVC::DrawLine(int x1, int y1, int x2, int y2, uchar color)
 void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
 {
     int px1 = x1;
-    int py1 = y1*16;
+    int py1 = y1 + state.m_pram->get(p_srcPage)*16;
     int px2 = x2;
-    int py2 = y2;
+    int py2 = y2 + state.m_pram->get(p_dstPage)*16;
 //#pragma omp parallel for
     for (int yy=0;yy<h;yy++)
         for (int xx=0;xx<w;xx++) {
@@ -231,7 +272,9 @@ void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int 
 
 void OKVC::Update()
 {
-    state.m_pram->set(p_time,rand()%255);
+//    StripPramToVram();
+
+    state.m_pram->set(p_time,rand()%256);
     if (get(p_exec)==p_pixel) {
         PutPixel(get(p_p1_x), get(p_p1_y),get(p_p1_c));
     }
@@ -268,6 +311,9 @@ void OKVC::Update()
     set(p_exec,0);
 
     state.m_waitForVSYNC = (get(p_vsync)==1);
+
+  //  StripVramToPram();
+
 }
 
 void OKVC::VRAMtoScreen()
@@ -284,6 +330,8 @@ void OKVC::GenerateOutputSignal()
     int bw  = state.m_pram->get(p_borderWidth);
     int bh  = state.m_pram->get(p_borderHeight);
     int bc  = state.m_pram->get(p_borderColor);
+
+//    qDebug() << "BorderColor : "<<bc << state.m_palette[bc];
     /*   for (int y=0;y<m_screen.height();y++)
 //#pragma omp parallel for
         for (int x=0;x<m_screen.width();x++) {

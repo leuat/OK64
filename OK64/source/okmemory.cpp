@@ -15,8 +15,11 @@ uchar OKMemory::get(int pos)
 
 ushort OKMemory::getWord(int pos)
 {
-    if (pos>=m_memory.count())
+    if (pos>=m_memory.count()) {
+        qDebug() << "Warning: trying to set larger pram:" << pos;
+
         return 0;
+    }
     return (m_memory[pos]<<8) | m_memory[pos+1];
 }
 
@@ -24,8 +27,10 @@ ushort OKMemory::getWord(int pos)
 void OKMemory::set(int pos, uchar v)
 {
 //    qDebug() << " Setting " << QString::number(pos,16) << QString::number(v);
-    if (pos>=m_memory.count())
+    if (pos>=m_memory.count()) {
+        qDebug() << "Warning: trying to set larger pram:" << pos;
         return;
+    }
     m_memory[pos] = v;
 
 }

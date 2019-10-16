@@ -60,8 +60,8 @@ win32-msvc*{
 }
 
 linux*{
-    LIBS +=  -lresid
-    QMAKE_CXXFLAGS += -O3 -fopenmp -lpthread
+    LIBS += -lresid -fopenmp -O3
+    QMAKE_CXXFLAGS += -fopenmp
 
 }
 

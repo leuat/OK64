@@ -10,8 +10,8 @@ void Mos6502::Initialize(OKMemory* pram)
 {
     m = pram;
     m_impl = new mos6502(BusRead, BusWrite);
+    m_impl->Reset();
     m_impl->pc = 0x400;
-
 //    initcpu(0x400,0,0,0);
 }
 

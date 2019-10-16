@@ -4,7 +4,9 @@ RComputer::RComputer()
 {
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
-    //m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
+#ifdef __linux__
+    m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
+#endif
 //    m_sid.
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
 /*    bool set_sampling_parameters(double clock_freq, sampling_method method,
@@ -35,6 +37,7 @@ void RComputer::Step()
         m_run = false;
     }
   //  m_cpu.Eat();
+
     m_okvc.Update();
 
 
@@ -49,11 +52,20 @@ void RComputer::Run()
 
 void RComputer::PowerOn()
 {
-    m_pram.Init(65536);
+    m_pram.Init(65536+0x100); // fucked up thing... 256 bytes off. WTF?
     m_vram.Init(65536*16);
     m_cpu.Initialize(&m_pram);
     m_cpu.LoadOpcodes();
     m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
+}
+
+void RComputer::Reset()
+{
+//    m_pram.Init(65536+0x100); // fucked up thing... 256 bytes off. WTF?
+  //  m_vram.Init(65536*16);
+    m_cpu.Initialize(&m_pram);
+    m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
+
 }
 
 int RComputer::LoadProgram(QString fn)
@@ -86,11 +98,16 @@ int RComputer::LoadProgram(QString fn)
 
 void RComputer::HandleInput()
 {
+
     if (m_currentKey!=0) {
-        qDebug() << "Key pressed:  " << m_currentKey;
+//        qDebug() << "Key pressed:  " << m_currentKey;
         m_pram.set(m_okvc.p_inputKey,m_currentKey);
         m_currentKey=0;
-        m_cpu.m_impl->INP();
+        if (m_okvc.InputVectorSet()) {
+//            qDebug() << "Firing interrupt at $"<<
+  //                      QString::number(m_pram.get(m_okvc.p_inputInterrupt+1)*256+m_pram.get(m_okvc.p_inputInterrupt),16);
+            m_cpu.m_impl->INP();
+        }
     }
 }
 void RComputer::run()
@@ -104,10 +121,12 @@ void RComputer::Execute()
     sleep((1/100.0));
     onAudio();
     int time = 0;
+//    m_cpu.m_impl->pc = 0x400;
     while (!m_abort) {
         QElapsedTimer timer;
         timer.start();
         m_soundPos = 16+((QInfiniteBuffer*)m_audio.m_input)->getPos();
+//        qDebug() << ((QInfiniteBuffer*)m_audio.m_input)->getPos();
         onAudio();
         HandleInput();
         m_okvc.PrepareRaster();
@@ -117,6 +136,7 @@ void RComputer::Execute()
                 Step();
 
         }
+
 
         m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
 
@@ -139,12 +159,10 @@ void RComputer::Execute()
 
             if (slp>0)
                 usleep(slp);
-
-
-            else qDebug() << "frame skip at "<<time ;
+//            else qDebug() << "frame skip at "<<time<<slp ;
 
         }
-
+//        qDebug() << "Border " << Util::numToHex(m_pram.get(m_okvc.p_borderColor));
 
 
     }
@@ -170,7 +188,13 @@ void RComputer::onAudio()
 //    qDebug() << pp;
 //#pragma omp parallel for
     int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
+#ifdef _WIN32
     for (int i=0;i<m_audio.m_size*2;i++) {
+#endif
+#ifdef __linux__
+        for (int i=0;i<m_audio.m_size*1;i++) {
+
+#endif
 //        if (m_abort)
   //          return;
 

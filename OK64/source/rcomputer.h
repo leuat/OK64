@@ -7,7 +7,12 @@
 #include <QDebug>
 #include "source/6502/mos6502.h"
 #include "source/rvc.h"
+#ifdef __linux__
 #include "resid/sid.h"
+#endif
+#ifdef _WIN32
+#include "resid_win/sid.h"
+#endif
 #include <QAudio>
 #include <QAudioBuffer>
 #include <QAudioFormat>
@@ -94,19 +99,21 @@ public:
     bool m_audioAction = false;
     bool m_outputBusy = false;
 
-    OKMemory m_pram, m_vram;
+    OKMemory m_pram;
     RAudio m_audio;
     Mos6502 m_cpu;
 
 
     OKVC m_okvc;
     SID m_sid;
+    OKMemory m_vram;
 
     float m_workLoad;
     void Step();
     void Run();
     void Update();
     void PowerOn();
+    void Reset();
     int LoadProgram(QString fn);
 
     void setKey(int k) {m_currentKey = k;}

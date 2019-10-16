@@ -66,7 +66,7 @@ public:
     const int ind = 10;
     const int rel = 11;
 
-    mos6502* m_impl;
+    mos6502* m_impl = nullptr;
     MOS6502Registers r;
     static OKMemory* m;
     uchar cmp, cpx, cpy;

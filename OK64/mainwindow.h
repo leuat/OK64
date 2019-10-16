@@ -27,7 +27,8 @@ public:
     void keyPressEvent(QKeyEvent *e);
     void SetDarkPalette();
     void Fit();
-
+    void Reset();
+    void ResetFocus();
 private:
     Ui::MainWindow *ui;
 
@@ -40,6 +41,7 @@ private slots:
     void on_pushButton_2_clicked();
     void onQuit();
     void on_leDIr_textChanged(const QString &arg1);
+    void on_pushButton_3_clicked();
 };
 
 #endif // MAINWINDOW_H

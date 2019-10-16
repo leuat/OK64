@@ -27,26 +27,9 @@ int main(int argc, char *argv[])
         w.m_computer.m_run =true;
     }
     else {
-/*        w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/okcomputer.prg");
-        w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/okcomputer.sym");
-*/
-#ifdef _WIN32
-/*        w.m_computer.LoadProgram("D:/Dropbox/TRSE/Rhea/okcomputer.prg");
-       w.m_computer.m_cpu.LoadSybols("D:/Dropbox/TRSE/Rhea/okcomputer.sym");*/
-       w.m_computer.LoadProgram(":resources/rom/kos.prg");
-//      w.m_computer.m_cpu.LoadSybols("D:/Dropbox/TRSE/Rhea/okcomputer.sym");
-#endif
 
-#ifdef __linux__
-       w.m_computer.LoadProgram("/home/leuat/Dropbox/TRSE/Rhea/kos.prg");
-        w.m_computer.m_cpu.LoadSybols("/home/leuat/Dropbox/TRSE/Rhea/kos.sym");
-#endif
+        w.Reset();
 
-
-        w.m_computer.m_run =true;
-
-//        w.m_computer.m_cpu.m_breakPoints.append(0x133b);
-//        w.m_computer.m_cpu.m_breakPoints.append(0x1179);
     }
     w.show();
     return a.exec();

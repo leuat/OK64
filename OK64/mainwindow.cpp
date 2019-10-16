@@ -170,6 +170,21 @@ void MainWindow::Fit()
 
 }
 
+void MainWindow::Reset()
+{
+    m_computer.m_run =false;
+
+    m_computer.LoadProgram(":resources/rom/kos.prg");
+    m_computer.Reset();
+
+    m_computer.m_run =true;
+}
+
+void MainWindow::ResetFocus()
+{
+    ui->lblOutput->setFocus();
+}
+
 void MainWindow::onEmitOutput()
 {
 //    qDebug() << m_count;
@@ -192,17 +207,19 @@ void MainWindow::onEmitOutput()
 void MainWindow::on_btnNext_clicked()
 {
     m_computer.Step();
-
+    ResetFocus();
 }
 
 void MainWindow::on_btnRun_clicked()
 {
     m_computer.Run();
+    ResetFocus();
 }
 
 void MainWindow::on_pushButton_clicked()
 {
     m_computer.m_run = false;
+    ResetFocus();
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -211,6 +228,7 @@ void MainWindow::on_pushButton_2_clicked()
     ui->txtStatus->setVisible(!ui->txtStatus->isVisible());
     ui->txtOutput->setVisible(!ui->txtOutput->isVisible());
     Fit();
+    ResetFocus();
 }
 
 void MainWindow::onQuit()
@@ -223,4 +241,11 @@ void MainWindow::onQuit()
 void MainWindow::on_leDIr_textChanged(const QString &arg1)
 {
     m_computer.m_okvc.m_currentDir = arg1;
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    Reset();
+    ResetFocus();
+
 }

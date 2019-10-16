@@ -5,7 +5,7 @@
 #include <QImage>
 #include <QDebug>
 #include <QPainter>
-
+#include <QRandomGenerator>
 #include "source/okmemory.h"
 #include "source/6502/impl.h"
 
@@ -33,7 +33,10 @@ public:
     const int p_borderColor = 0xFFE9;
     const int p_inputKey = 0xFFE8;
     const int p_fileLocation = 0xFF20;
-
+    const int p_srcPage = 0xFFE7;
+    const int p_dstPage = 0xFFE6;
+    const int p_curStrip = 0xFFE5;
+    const int p_strip = 0xFE00;
 
     const int p_inputInterrupt = 0xFFF8;
 
@@ -59,7 +62,7 @@ public:
     const int p_resetFileList = 9;
     const int p_nextFile = 10;
     const int p_loadFile = 11;
-
+//    QRandomGenerator* m_rand;
     OKVC();
     QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";
 
@@ -70,6 +73,8 @@ public:
     QImage m_backbuffer;
     QImage m_screen;
     OKVC_State state;
+    void StripPramToVram();
+    void StripVramToPram();
     void PrepareRaster()
     {
         state.m_waitForVSYNC = false;
@@ -80,7 +85,8 @@ public:
     void ResetFileList();
     void ReadNextFile();
     void LoadFile();
-
+    bool InputVectorSet();
+    void Defaults();
 
     void LoadRom(QString file, int pos, bool stripHeader=false);
     void Init(OKMemory* pram, OKMemory* vram, mos6502* imp);

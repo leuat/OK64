@@ -67,6 +67,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -81,7 +88,7 @@
             <item>
              <widget class="QLineEdit" name="leDIr">
               <property name="text">
-               <string>D:\Dropbox\TRSE\Rhea\</string>
+               <string>tutorials/OK64/Tutorials/</string>
               </property>
              </widget>
             </item>
@@ -128,7 +135,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>20</height>
+     <height>28</height>
     </rect>
    </property>
   </widget>
