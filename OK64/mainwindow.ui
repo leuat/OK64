@@ -40,13 +40,6 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QPushButton" name="btnRun">
-              <property name="text">
-               <string>Run</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="pushButton">
               <property name="text">
                <string>Pause</string>
@@ -56,14 +49,14 @@
             <item>
              <widget class="QPushButton" name="btnNext">
               <property name="text">
-               <string>Next</string>
+               <string>Step</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_2">
               <property name="text">
-               <string>Debug</string>
+               <string>Toggle data</string>
               </property>
              </widget>
             </item>
@@ -135,7 +128,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>28</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

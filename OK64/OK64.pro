@@ -56,6 +56,7 @@ win32-msvc*{
     LIBS += -openmp
     QMAKE_CXXFLAGS += -O3
     LIBS += -L$$PWD/libs/ -lresid
+#   QMAKE $$PWD\..\..\TRSE\Publish\tutorials\OK64\KOS\kos.prg $$PWD/resources/rom/
 
 }
 

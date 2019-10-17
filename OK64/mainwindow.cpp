@@ -72,15 +72,15 @@ void MainWindow::DisplayProgram()
     }
 
     pc = m_computer.m_cpu.r.pc;
-    while (m_commands.count()<4)
+    while (m_commands.count()<6)
         m_commands.append(" ");
 
-    while (m_commands.count()>4)
+    while (m_commands.count()>6)
         m_commands.removeFirst();
     for (int i=0;i<m_commands.count()-1;i++) {
         output+="<br>"+m_commands[i];
     }
-    for (int i=0;i<4;i++) {
+    for (int i=0;i<8;i++) {
         QString f="";
         QString af = "";
         QString cmd = m_computer.m_cpu.getInstructionAt(pc);
@@ -98,8 +98,8 @@ void MainWindow::DisplayProgram()
             output+="<br>"+f+cmd+af;
         }
 
-    for (ushort s: m_computer.m_cpu.m_symbols.keys())
-        output+=m_computer.m_cpu.m_symbols[s]+", ";
+  //  for (ushort s: m_computer.m_cpu.m_symbols.keys())
+    //    output+=m_computer.m_cpu.m_symbols[s]+", ";
     ui->txtOutput->setText(output);
 }
 
@@ -113,14 +113,14 @@ void MainWindow::UpdateStatus()
     out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
     out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
     out +="&nbsp; N = " + Util::numToHex((uchar)m_computer.m_cpu.r.N);
-    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_pram.get(m_computer.m_okvc.p_time));
+//    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_pram.get(m_computer.m_okvc.p_time));
     out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(m_computer.m_okvc.p_p1_x+i)));
-    out +="<br>";
+/*    out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(0xD400+i)));
-
+*/
     // Smoothen workload
     if (m_workLoad == 0.0)
         m_workLoad = m_computer.m_workLoad;
@@ -195,9 +195,11 @@ void MainWindow::onEmitOutput()
     m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen, Qt::AutoColor);
 
     ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
-    if (ui->txtStatus->isVisible() && ((m_count&3)==0)) {
-        UpdateStatus();
-        DisplayProgram();
+    if (ui->txtStatus->isVisible()) {
+        if ((m_count&1)==0)
+            UpdateStatus();
+        else
+            DisplayProgram();
     }
     m_count++;
     m_computer.m_outputBusy=false;
@@ -218,7 +220,12 @@ void MainWindow::on_btnRun_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    m_computer.m_run = false;
+    m_computer.m_run = !m_computer.m_run;
+    if (m_computer.m_run)
+        ui->pushButton->setText("Pause");
+    else
+        ui->pushButton->setText("Continue");
+
     ResetFocus();
 }
 
