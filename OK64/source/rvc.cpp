@@ -179,6 +179,22 @@ void OKVC::DrawCircle(int x, int y, int radius, uchar color, bool fill)
 }
 
 
+void OKVC::DrawPolygon(int x1, int y1, int x2,int y2, int x3, int y3, uchar color, bool fill)
+{
+    QPainter painter;
+
+    painter.begin(&m_img);
+    painter.setPen(QPen(QColor(color,0,0), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
+    painter.setBrush(QColor(color,0,0));
+ //   painter.drawEllipse(x,y,radius,radius);
+    QVector<QPoint> points;
+    points.append(QPoint(x1,y1));
+    points.append(QPoint(x2,y2));
+    points.append(QPoint(x3,y3));
+    painter.drawPolygon(points);
+    painter.end();
+}
+
 void OKVC::DrawLine(int x1, int y1, int x2, int y2, uchar color)
 {
     QPainter painter;
@@ -298,6 +314,9 @@ void OKVC::Update()
     }
     if (get(p_exec)==p_rect) {
         Rect(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x) );
+    }
+    if (get(p_exec)==p_drawPoly) {
+        DrawPolygon(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x),get(p_p2_y),get(p_p2_c),true);
     }
     if (get(p_exec)==p_resetFileList)
         ResetFileList();

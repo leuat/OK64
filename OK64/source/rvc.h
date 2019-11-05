@@ -62,6 +62,7 @@ public:
     const int p_resetFileList = 9;
     const int p_nextFile = 10;
     const int p_loadFile = 11;
+    const int p_drawPoly = 12;
 //    QRandomGenerator* m_rand;
     OKVC();
     QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";
@@ -92,6 +93,8 @@ public:
     void Init(OKMemory* pram, OKMemory* vram, mos6502* imp);
     void PutPixel(int x, int y, uchar color);
     void DrawCircle(int x, int y, int radius, uchar color, bool fill);
+    void DrawPolygon(int x1, int y1, int x2,int y2, int x3, int y3, uchar color, bool fill);
+
     void DrawLine(int x1, int y1, int x2, int y2, uchar color);
     void Blit(int x1, int y1, int x2, int y2, int w, int h);
     void BlitFont(int fontsizeX, int fontsizeY, int c, int col, int px, int py);
