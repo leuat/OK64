@@ -1,6 +1,7 @@
 #include "source/rvc.h"
 #include <QFile>
 #include <QDirIterator>
+#include <QVector3D>
 OKVC::OKVC()
 {
 }
@@ -151,7 +152,14 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
         int k = (color&0b00011000)>>3;
         int dd=0;
 //        if ((k&1)==1) dd=15;
-        state.m_palette[color] = QColor((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
+        QVector3D col = QVector3D((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
+        float c = (col.x()+col.y()+col.z())/3.0;
+        QVector3D s(0.8,0.2,0.6);
+//        s = QVector3D(1,1,0.5);
+        col.setX(c*(1-s.x())+col.x()*(s.x()));
+        col.setY(c*(1-s.y())+col.y()*(s.y()));
+        col.setZ(c*(1-s.z())+col.z()*(s.z()));
+        state.m_palette[color] = Util::toColor(col);
     }
 //    qDebug() << QString::number(state.m_pram->get(p_fontBank));
     LoadRom(":resources/rom/font.bin",0xF0000,false);

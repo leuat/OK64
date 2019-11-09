@@ -8,7 +8,7 @@
 #include <QRandomGenerator>
 #include "source/okmemory.h"
 #include "source/6502/impl.h"
-
+#include "source/misc/util.h"
 class OKVC_State {
 public:
     bool m_waitForVSYNC = false;
