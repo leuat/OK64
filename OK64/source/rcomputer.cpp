@@ -5,7 +5,7 @@ RComputer::RComputer()
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
 #ifdef __linux__
-    m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
+//   m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
 #endif
 //    m_sid.
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
@@ -125,8 +125,6 @@ void RComputer::Execute()
     while (!m_abort) {
         QElapsedTimer timer;
         timer.start();
-        m_soundPos = 16+((QInfiniteBuffer*)m_audio.m_input)->getPos();
-//        qDebug() << ((QInfiniteBuffer*)m_audio.m_input)->getPos();
         onAudio();
         HandleInput();
         m_okvc.PrepareRaster();
@@ -187,38 +185,39 @@ void RComputer::onAudio()
 //    int pp = m_audio.m_input->pos();
 //    qDebug() << pp;
 //#pragma omp parallel for
+
+//    m_soundPos = 160+((QInfiniteBuffer*)m_audio.m_input)->getPos();
+    int old = m_audio.m_curPos;
+    m_audio.m_curPos = ((QInfiniteBuffer*)m_audio.m_input)->getPos();
+
+    if (m_audio.m_curPos != old)
+        m_soundPos = m_audio.m_curPos;
+
+    m_soundPos += m_audio.m_size*4-16;
     int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
 #ifdef _WIN32
-    for (int i=0;i<m_audio.m_size*2;i++) {
+    for (int i=0;i<m_audio.m_size;i++) {
 #endif
 #ifdef __linux__
+
+  //      qDebug() << ((QInfiniteBuffer*)m_audio.m_input)->getPos() << " vs " << m_audio.m_size;
+
         for (int i=0;i<m_audio.m_size*1;i++) {
 
 #endif
-//        if (m_abort)
-  //          return;
 
         m_sid.clock(csdelta);
         int v = m_sid.output();
         float sample = (float)v/65536.0;
 //        sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
-        char byte00 = *ptr;         // 1st byte
-        char byte01 = *(ptr + 1);   // 2nd byte
-        char byte02 = *(ptr + 2);   // 3rd byte
-        char byte03 = *(ptr + 3);   // 4th byte
         int j = (size+ i*4 + m_soundPos)%(size);// + m_audio.m_cur*4*s;
-        m_audio.m_soundBuffer[j+0] = byte00;
-        m_audio.m_soundBuffer[j+1] = byte01;
-        m_audio.m_soundBuffer[j+2] = byte02;
-        m_audio.m_soundBuffer[j+3] = byte03;
+        m_audio.m_soundBuffer[j+0] = *ptr;
+        m_audio.m_soundBuffer[j+1] = *(ptr + 1);
+        m_audio.m_soundBuffer[j+2] = *(ptr + 2);
+        m_audio.m_soundBuffer[j+3] = *(ptr + 3);
     }
 
-/*    if (m_audio.m_cur++==m_audio.m_bufscale) {
-        m_audio.m_cur = 0;
-    }
-*/
-//    m_audio.CopyBuffer();
 
     m_audioAction=false;
 
@@ -236,7 +235,7 @@ void RAudio::Init(int samplerate, float dur) {
     float duration = dur;     // duration in seconds
     int n  = int(duration * sampleRate);   // number of data samples
 
-    m_size = n;//*m_bufscale;
+    m_size = n;
     m_soundBuffer.resize(n*4*m_bufscale);
     m_soundBuffer.fill(0);
     m_tempSoundBuffer.resize(n*4*m_bufscale);
@@ -286,6 +285,7 @@ void RAudio::handleStateChanged(QAudio::State newState)
     if (done) {
   //      qDebug() << "DONE";
         audio->stop();
+
         delete m_input;
         m_input = nullptr;
     }

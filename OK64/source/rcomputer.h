@@ -68,7 +68,8 @@ public:
     QAudioOutput* audio;
     AThread m_aThread;
     int m_size = 0;
-    float m_bufscale = 4;
+    int m_curPos = 0;
+    float m_bufscale = 64;
     int m_cur = 0;
    // QInfiniteBuffer* m_input;
     QInfiniteBuffer* m_input = nullptr;
