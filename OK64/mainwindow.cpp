@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Fit();
     //uielement->setFocusPolicy(Qt::NoFocus);
-    ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
+    //ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
     m_computer.m_okvc.m_currentDir = ui->leDIr->text();
 
 
@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->setStyleSheet(StyleSheet);
 */
     qApp->setStyleSheet(StyleSheet);
+    UpdateShader();
 }
 
 MainWindow::~MainWindow()
@@ -166,7 +167,7 @@ void MainWindow::Fit()
     bool visible = ui->txtOutput->isVisible();
     ui->hlMain->setStretch(0,1);
     ui->hlMain->setStretch(1,1*visible);
-    setFixedSize(800*(visible+1),800);
+    setFixedSize(800*(visible+1),900);
 
 }
 
@@ -182,7 +183,8 @@ void MainWindow::Reset()
 
 void MainWindow::ResetFocus()
 {
-    ui->lblOutput->setFocus();
+    //ui->lblOutput->setFocus();
+    ui->widget->setFocus();
 }
 
 void MainWindow::onEmitOutput()
@@ -194,7 +196,10 @@ void MainWindow::onEmitOutput()
 //    m_computer.m_okvc.GenerateOutputSignal();
     m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen, Qt::AutoColor);
 
-    ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
+//    ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
+
+    ui->widget->setTexture(m_computer.m_okvc.m_screen);
+
     if (ui->txtStatus->isVisible()) {
         if ((m_count&1)==0)
             UpdateStatus();
@@ -255,4 +260,41 @@ void MainWindow::on_pushButton_3_clicked()
     Reset();
     ResetFocus();
 
+}
+
+void MainWindow::on_sldCrt_valueChanged(int value)
+{
+    UpdateShader();
+}
+
+void MainWindow::UpdateShader()
+{
+    float crt = ui->sldCrt->value()/100.0; // 0-1
+    float bs = 1.2*(1-crt*0.2);
+    ui->widget->CD = QVector3D(0.3,0.6,0)*crt;
+    ui->widget->barrelScale =  (QVector3D(bs,bs,bs) - (0.40 * ui->widget->CD)*crt);
+    ui->widget->saturation = ui->sldSat->value()/100.0*3; // 0-3
+    ui->widget->gamma = ui->sldGamma->value()/100.0*2; // 0-3
+    ui->widget->lamp = ui->sldScan->value()/100.0*2; // 0-3
+    ui->widget->chromatic = ui->sldChrom->value()/3000.0;
+}
+
+void MainWindow::on_sldSat_valueChanged(int value)
+{
+    UpdateShader();
+}
+
+void MainWindow::on_sldGamma_valueChanged(int value)
+{
+    UpdateShader();
+}
+
+void MainWindow::on_sldScan_valueChanged(int value)
+{
+    UpdateShader();
+}
+
+void MainWindow::on_sldChrom_valueChanged(int value)
+{
+    UpdateShader();
 }

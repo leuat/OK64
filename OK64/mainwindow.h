@@ -42,6 +42,12 @@ private slots:
     void onQuit();
     void on_leDIr_textChanged(const QString &arg1);
     void on_pushButton_3_clicked();
+    void on_sldCrt_valueChanged(int value);
+    void UpdateShader();
+    void on_sldSat_valueChanged(int value);
+    void on_sldGamma_valueChanged(int value);
+    void on_sldScan_valueChanged(int value);
+    void on_sldChrom_valueChanged(int value);
 };
 
 #endif // MAINWINDOW_H

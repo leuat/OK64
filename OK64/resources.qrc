@@ -4,5 +4,7 @@
         <file>resources/rom/font.bin</file>
         <file>resources/rom/kos.prg</file>
         <file>resources/QTDark.stylesheet</file>
+        <file>resources/shaders/screen.frag</file>
+        <file>resources/shaders/screen.vert</file>
     </qresource>
 </RCC>

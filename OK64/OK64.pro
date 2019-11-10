@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT       += core gui multimedia opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,6 +27,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         source/6502/impl.cpp \
+        source/glwidget.cpp \
         source/okmemory.cpp \
         source/rvc.cpp \
         source/6502/mos6502.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         source/6502/impl.h \
+        source/glwidget.h \
         source/okmemory.h \
         source/rvc.h \
         source/6502/mos6502.h \

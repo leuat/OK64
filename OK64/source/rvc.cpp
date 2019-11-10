@@ -351,6 +351,13 @@ void OKVC::VRAMtoScreen()
             m_img.setPixelColor(x,y,QColor(state.m_vram->get(x+y*256),0,0));
 
 }
+QVector3D OKVC::Distort(QVector3D coord)
+{
+    float rsq = coord.x() * coord.x() + coord.y() * coord.y();
+    coord += coord * (m_CD * rsq);
+    coord *= m_barrelScale;
+    return coord;
+}
 
 void OKVC::GenerateOutputSignal()
 {
@@ -374,15 +381,17 @@ void OKVC::GenerateOutputSignal()
     QRgb *screen = (QRgb *) m_screen.bits();
     QRgb *back = (QRgb *) m_img.bits();
     int w = m_screen.width();
+
     for (int y=0;y<m_screen.height();y++)
 //        #pragma omp parallel for
         for (int x=0;x<w;x++) {
-            int col = QColor(back[y*w+x]).red();
+            int pos = y*w+x;
+
+            int col = QColor(back[pos]).red();
             if (y<bh || y>m_screen.height()-bh)
                 col = bc;
             if (x<bw || x>w-bw)
                 col = bc;
-
             screen[y*w+x] = state.m_palette[col].rgba();
         }
 }

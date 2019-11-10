@@ -69,11 +69,15 @@ public:
 
     void InsertString(QString s, int pos);
     int m_currentFile = 0;
-
+    int m_time = 0;
     QImage m_img;
     QImage m_backbuffer;
     QImage m_screen;
     OKVC_State state;
+
+    QVector3D m_barrelScale, m_CD;
+    QVector3D Distort(QVector3D coord);
+
     void StripPramToVram();
     void StripVramToPram();
     void PrepareRaster()
