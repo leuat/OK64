@@ -49,7 +49,7 @@ public:
   // 8-bit envelope output.
   reg8 output();
 
-protected:
+public:
   reg16 rate_counter;
   reg16 rate_period;
   reg16 exponential_counter;
@@ -76,7 +76,7 @@ protected:
   // The 16 selectable sustain levels.
   static reg8 sustain_level[];
 
-friend class SID;
+friend class SIDD;
 };
 
 

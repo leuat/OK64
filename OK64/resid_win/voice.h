@@ -38,11 +38,11 @@ public:
   // Range [0, 4095*255].
   sound_sample output();
 
-protected:
+public:
   WaveformGenerator wave;
   EnvelopeGenerator envelope;
 
-friend class SID;
+friend class SIDD;
 };
 
 

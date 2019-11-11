@@ -774,7 +774,7 @@ void mos6502::Op_ADC(uint16_t src)
 	uint8_t m = Read(src);
 	unsigned int tmp = m + A + (IF_CARRY() ? 1 : 0);
 	SET_ZERO(!(tmp & 0xFF));
-    if (IF_DECIMAL())
+    if (IF_DDECIMAL())
     {
         if (((A & 0xF) + (m & 0xF) + (IF_CARRY() ? 1 : 0)) > 9) tmp += 6;
         SET_NEGATIVE(tmp & 0x80);
@@ -935,7 +935,7 @@ void mos6502::Op_CLC(uint16_t src)
 
 void mos6502::Op_CLD(uint16_t src)
 {
-	SET_DECIMAL(0);
+    SET_DDECIMAL(0);
 	return;
 }
 
@@ -1226,7 +1226,7 @@ void mos6502::Op_SBC(uint16_t src)
 	SET_ZERO(!(tmp & 0xFF));
     SET_OVERFLOW(((A ^ tmp) & 0x80) && ((A ^ m) & 0x80));
 
-    if (IF_DECIMAL())
+    if (IF_DDECIMAL())
     {
     	if ( ((A & 0x0F) - (IF_CARRY() ? 0 : 1)) < (m & 0x0F)) tmp -= 6;
         if (tmp > 0x99)
@@ -1247,7 +1247,7 @@ void mos6502::Op_SEC(uint16_t src)
 
 void mos6502::Op_SED(uint16_t src)
 {
-	SET_DECIMAL(1);
+    SET_DDECIMAL(1);
 	return;
 }
 

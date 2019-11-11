@@ -54,7 +54,7 @@ public:
   // 12-bit waveform output.
   reg12 output();
 
-protected:
+public:
   const WaveformGenerator* sync_source;
   WaveformGenerator* sync_dest;
 
@@ -114,7 +114,7 @@ protected:
   reg8* wave_PST;
 
 friend class Voice;
-friend class SID;
+friend class SIDD;
 };
 
 

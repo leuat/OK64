@@ -131,7 +131,7 @@ public:
   void fc_default(const fc_point*& points, int& count);
   PointPlotter<sound_sample> fc_plotter();
 
-protected:
+public:
   void set_w0();
   void set_Q();
 
@@ -175,7 +175,7 @@ protected:
   sound_sample f0[2048];
   static fc_point f0_points[];
 
-friend class SID;
+friend class SIDD;
 };
 
 

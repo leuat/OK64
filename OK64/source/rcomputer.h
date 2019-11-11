@@ -106,7 +106,7 @@ public:
 
 
     OKVC m_okvc;
-    SID m_sid;
+    SIDD m_sid;
     OKMemory m_vram;
 
     float m_workLoad;
