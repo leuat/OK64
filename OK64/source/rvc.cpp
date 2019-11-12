@@ -108,28 +108,11 @@ void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
         pos = blob[1]*0x100 + blob[0];
         blob.remove(0,2);
     }
-    int programSize = min(blob.size()+pos,65536);
 
-    if (startpos<65536) {
-        for (int i=0;i<programSize;i++)
-            if (i+pos<0xFE00)
-                state.m_pram->set(i+pos,blob[i]);
+    for (int i=0;i<blob.size();i++)
+        if (i+pos<0xFE00 || i+pos>=0x10000 )
+            writeMem(i+pos,blob[i]);
 
-        blob.remove(0,programSize);
-    }
-//    return;
-    if (pos<65536)
-        pos = 0;
-    if (blob.size()>0) {
-        for (int i=0;i<blob.size();i++)
-            state.m_vram->set(i+pos,blob[i]);
-//        qDebug() << "HERE " << fn << QString::number(pos,16);
-
-    }
-//    LoadRom(":resources/rom/font.bin",0xF0000,false);
-
-//    m_okvc.LoadRom(fn,0x400,true);
-  //  m_okvc.VRAMtoScreen();
 
 
 }
@@ -148,6 +131,7 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
     m_screen = QImage(256,256,QImage::Format_RGB32);
 
     state.m_palette.resize(256);
+    QByteArray data;
     for (int color=0;color<256;color++) {
         int k = (color&0b00011000)>>3;
         int dd=0;
@@ -155,14 +139,19 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
         QVector3D col = QVector3D((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
         float c = (col.x()+col.y()+col.z())/3.0;
         QVector3D s(0.8,0.2,0.6);
-//        s = QVector3D(1,1,0.5);
+      //  s = QVector3D(1,0.0,0.6);
         col.setX(c*(1-s.x())+col.x()*(s.x()));
         col.setY(c*(1-s.y())+col.y()*(s.y()));
         col.setZ(c*(1-s.z())+col.z()*(s.z()));
         state.m_palette[color] = Util::toColor(col);
+        data.append((char)col.x());
+        data.append((char)col.y());
+        data.append((char)col.z());
     }
+//    Util::SaveByteArray(data,"ok64_default_palette.bin");
 //    qDebug() << QString::number(state.m_pram->get(p_fontBank));
-    LoadRom(":resources/rom/font.bin",0xF0000,false);
+
+    LoadRom(":resources/rom/font.bin",0x100000,false);
     Defaults();
 
 
@@ -202,6 +191,51 @@ void OKVC::DrawPolygon(int x1, int y1, int x2,int y2, int x3, int y3, uchar colo
     painter.drawPolygon(points);
     painter.end();
 }
+
+uchar OKVC::readMem(int address)
+{
+    if (address>=0 && address<0x10000)
+        return state.m_pram->get(address);
+    if (address>=0x10000 && address<0x20000) {
+        return m_img.bits()[(address-0x10000)*4+2];
+
+    }
+//    if (rand()%100>98)
+  //      qDebug() << "READ";
+
+    if (address>=0x20000)
+        return state.m_vram->get(address-0x10000);
+
+}
+
+void OKVC::writeMem(int address, uchar val)
+{
+
+    if (address>=0 && address<0x10000)
+        state.m_pram->set(address,val);
+    else
+    if (address>=0x10000 && address<0x20000) {
+        m_img.bits()[(address-0x10000)*4+2]=val;
+    }
+    else
+    if (address>=0x20000)
+        state.m_vram->set(address-0x10000,val);
+
+}
+
+void OKVC::MemCpyOKVC(int hh1, int h1, int l1, int hh2, int h2, int l2, int hc, int lc)
+{
+    int from = (hh1<<16) + (h1<<8) + l1;
+    int to= (hh2<<16) + (h2<<8) + l2;
+    int len = (hc<<8) + lc;
+
+//    qDebug() << "memcpyOKVC from / to: " << Util::numToHex(from)<< ", " <<Util::numToHex(to) << "   len = " <<Util::numToHex(len);
+
+    for (int i=0;i<len;i++)
+        writeMem(to+i, readMem(from+i));
+}
+
+
 
 void OKVC::DrawLine(int x1, int y1, int x2, int y2, uchar color)
 {
@@ -326,6 +360,9 @@ void OKVC::Update()
     if (get(p_exec)==p_drawPoly) {
         DrawPolygon(get(p_p1_x), get(p_p1_y), get(p_p1_c),get(p_p1_3),get(p_p2_x),get(p_p2_y),get(p_p2_c),true);
     }
+    if (get(p_exec)==p_memcpy) {
+        MemCpyOKVC(get(p_p1_x), get(p_p1_y), get(p_p1_c), get(p_p1_3),get(p_p2_x),get(p_p2_y),  get(p_p2_c),get(p_p2_3));
+    }
     if (get(p_exec)==p_resetFileList)
         ResetFileList();
 
@@ -346,10 +383,10 @@ void OKVC::Update()
 void OKVC::VRAMtoScreen()
 {
 //    QRgb* s =
-    for (int y=0;y<256;y++)
+/*    for (int y=0;y<256;y++)
         for (int x=0;x<256;x++)
             m_img.setPixelColor(x,y,QColor(state.m_vram->get(x+y*256),0,0));
-
+*/
 }
 QVector3D OKVC::Distort(QVector3D coord)
 {

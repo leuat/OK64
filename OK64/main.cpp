@@ -5,6 +5,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
+    w.m_computer.m_run =false;
+    w.Reset();
     int c=1;
     if (argc!=1) {
 //        qDebug() << "Argc " << argc;

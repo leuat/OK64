@@ -106,7 +106,12 @@ public:
 
 
     OKVC m_okvc;
+#ifdef _WIN32
     SIDD m_sid;
+#endif
+#ifdef __linux__
+    SID m_sid;
+#endif
     OKMemory m_vram;
 
     float m_workLoad;

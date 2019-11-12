@@ -21,12 +21,9 @@ void RComputer::Step()
 {
     int i=0;
     for (ushort u:m_cpu.m_breakPoints) {
-//        qDebug() << "BP should be " << Util::numToHex(u);
         if (u == m_cpu.r.pc) {
             m_run = false;
             m_cpu.m_breakPoints.removeAll(u);
-  //          qDebug() << "BP " << Util::numToHex(m_cpu.r.pc);
-            //        m_cpu.m_breakPoints.remove( m_cpu.m_breakPoints.at(m_cpu.r.pc));
             return;
 
         }
@@ -36,7 +33,6 @@ void RComputer::Step()
     if (!m_cpu.Eat()) {
         m_run = false;
     }
-  //  m_cpu.Eat();
 
     m_okvc.Update();
 
@@ -61,8 +57,6 @@ void RComputer::PowerOn()
 
 void RComputer::Reset()
 {
-//    m_pram.Init(65536+0x100); // fucked up thing... 256 bytes off. WTF?
-  //  m_vram.Init(65536*16);
     m_cpu.Initialize(&m_pram);
     m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
 
@@ -70,25 +64,6 @@ void RComputer::Reset()
 
 int RComputer::LoadProgram(QString fn)
 {
-/*    QFile file(fn);
-    if (!file.open(QIODevice::ReadOnly)) return 0;
-    QByteArray blob = file.readAll();
-    int pos = blob[1]*0x100 + blob[0];
-    //qDebug() << blob.size();
-
-    int programSize = min(blob.size()+pos,65536);
-    blob.remove(0,2);
-    for (int i=0;i<programSize;i++)
-        if (i+pos<0xFF00 || i+pos>0xFFFF)
-        m_pram.set(i+pos,blob[i]);
-
-    blob.remove(0,programSize);
-    if (blob.size()>0) {
-        for (int i=0;i<blob.size();i++)
-            m_vram.set(i,blob[i]);
-
-
-    }*/
     m_okvc.LoadRom(fn,0,true);
 
     m_okvc.VRAMtoScreen();
@@ -100,12 +75,9 @@ void RComputer::HandleInput()
 {
 
     if (m_currentKey!=0) {
-//        qDebug() << "Key pressed:  " << m_currentKey;
         m_pram.set(m_okvc.p_inputKey,m_currentKey);
         m_currentKey=0;
         if (m_okvc.InputVectorSet()) {
-//            qDebug() << "Firing interrupt at $"<<
-  //                      QString::number(m_pram.get(m_okvc.p_inputInterrupt+1)*256+m_pram.get(m_okvc.p_inputInterrupt),16);
             m_cpu.m_impl->INP();
         }
     }
@@ -142,7 +114,7 @@ void RComputer::Execute()
         //m_okvc.m_backbuffer = QImage(m_okvc.m_img);
         if (!m_abort) {
             time++;
-            if ((time&1)==1)
+//            if ((time&1)==1)
                 m_okvc.GenerateOutputSignal();
 
 //            qDebug() << m_soundPos;
