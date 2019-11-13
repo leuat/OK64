@@ -64,6 +64,7 @@ public:
     const int p_loadFile = 11;
     const int p_drawPoly = 12;
     const int p_memcpy = 13;
+    const int p_setDefaultPalette = 14;
 //    QRandomGenerator* m_rand;
     OKVC();
     QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";
@@ -109,6 +110,7 @@ public:
     void BlitFont(int fontsizeX, int fontsizeY, int c, int col, int px, int py);
     void Rect(int x1, int y1, int w, int h,uchar c);
     void Update();
+    void SetDefaultPalette();
     void VRAMtoScreen();
     void GenerateOutputSignal();
     uchar get(uint i);

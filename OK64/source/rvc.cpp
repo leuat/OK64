@@ -68,10 +68,8 @@ void OKVC::LoadFile()
         f+=QChar(state.m_pram->get(pos));
         pos++;
     }
-//    qDebug() << m_currentDir + f;
     if (!QFile::exists(m_currentDir + f))
         return;
-
     LoadRom(m_currentDir + f,0,true);
 //    state.m_impl->Run(0x400);
     state.m_impl->pc = 0x400;
@@ -130,30 +128,10 @@ void OKVC::Init(OKMemory* pram, OKMemory* vram, mos6502* imp)
     m_backbuffer = QImage(256,256,QImage::Format_RGB32);
     m_screen = QImage(256,256,QImage::Format_RGB32);
 
-    state.m_palette.resize(256);
-    QByteArray data;
-    for (int color=0;color<256;color++) {
-        int k = (color&0b00011000)>>3;
-        int dd=0;
-//        if ((k&1)==1) dd=15;
-        QVector3D col = QVector3D((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
-        float c = (col.x()+col.y()+col.z())/3.0;
-        QVector3D s(0.8,0.2,0.6);
-      //  s = QVector3D(1,0.0,0.6);
-        col.setX(c*(1-s.x())+col.x()*(s.x()));
-        col.setY(c*(1-s.y())+col.y()*(s.y()));
-        col.setZ(c*(1-s.z())+col.z()*(s.z()));
-        state.m_palette[color] = Util::toColor(col);
-        data.append((char)col.x());
-        data.append((char)col.y());
-        data.append((char)col.z());
-    }
-//    Util::SaveByteArray(data,"ok64_default_palette.bin");
-//    qDebug() << QString::number(state.m_pram->get(p_fontBank));
 
     LoadRom(":resources/rom/font.bin",0x100000,false);
     Defaults();
-
+    SetDefaultPalette();
 
 }
 
@@ -363,6 +341,10 @@ void OKVC::Update()
     if (get(p_exec)==p_memcpy) {
         MemCpyOKVC(get(p_p1_x), get(p_p1_y), get(p_p1_c), get(p_p1_3),get(p_p2_x),get(p_p2_y),  get(p_p2_c),get(p_p2_3));
     }
+    if (get(p_exec)==p_setDefaultPalette) {
+        SetDefaultPalette();
+    }
+
     if (get(p_exec)==p_resetFileList)
         ResetFileList();
 
@@ -377,6 +359,32 @@ void OKVC::Update()
     state.m_waitForVSYNC = (get(p_vsync)==1);
 
   //  StripVramToPram();
+
+}
+
+void OKVC::SetDefaultPalette()
+{
+    state.m_palette.resize(256);
+    QByteArray data;
+    for (int color=0;color<256;color++) {
+        int k = (color&0b00011000)>>3;
+        int dd=0;
+//        if ((k&1)==1) dd=15;
+        QVector3D col = QVector3D((color&0b00000111)*32,((color&0b00011000))*8+dd,(color&0b11100000));
+        float c = (col.x()+col.y()+col.z())/3.0;
+        QVector3D s(0.8,0.2,0.6);
+      //  s = QVector3D(1,0.0,0.6);
+        col.setX(c*(1-s.x())+col.x()*(s.x()));
+        col.setY(c*(1-s.y())+col.y()*(s.y()));
+        col.setZ(c*(1-s.z())+col.z()*(s.z()));
+        state.m_palette[color] = Util::toColor(col);
+        data.append((char)col.x());
+        data.append((char)col.y());
+        data.append((char)col.z());
+    }
+//    Util::SaveByteArray(data,"ok64_default_palette.bin");
+//    qDebug() << QString::number(state.m_pram->get(p_fontBank));
+
 
 }
 
