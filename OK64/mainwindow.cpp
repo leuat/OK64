@@ -35,6 +35,9 @@ MainWindow::MainWindow(QWidget *parent) :
 */
     qApp->setStyleSheet(StyleSheet);
     UpdateShader();
+//    ui->widget->showFullScreen();
+//    showFullScreen();
+//    ui->widget->setMaximumWidth(ui->widget->height()*1.2);
 }
 
 MainWindow::~MainWindow()

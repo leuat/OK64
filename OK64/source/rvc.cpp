@@ -89,11 +89,12 @@ void OKVC::Defaults()
     state.m_pram->set(p_borderColor,0x0);
     state.m_pram->set(p_borderWidth,0x10);
     state.m_pram->set(p_borderHeight,0x10);
-    state.m_pram->set(p_srcPage,16);
-    state.m_pram->set(p_dstPage,0);
+    state.m_pram->set(p_srcPage,32);
+    state.m_pram->set(p_dstPage,16);
     state.m_pram->set(p_inputInterrupt,0);
     state.m_pram->set(p_inputInterrupt+1,0);
-
+    state.m_pram->set(p_curBlitType,0);
+    state.m_pram->set(p_curBlitTypeVal,0);
 }
 
 void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
@@ -176,11 +177,7 @@ uchar OKVC::readMem(int address)
         return state.m_pram->get(address);
     if (address>=0x10000 && address<0x20000) {
         return m_img.bits()[(address-0x10000)*4+2];
-
     }
-//    if (rand()%100>98)
-  //      qDebug() << "READ";
-
     if (address>=0x20000)
         return state.m_vram->get(address-0x10000);
 
@@ -192,13 +189,26 @@ void OKVC::writeMem(int address, uchar val)
     if (address>=0 && address<0x10000)
         state.m_pram->set(address,val);
     else
-    if (address>=0x10000 && address<0x20000) {
-        m_img.bits()[(address-0x10000)*4+2]=val;
-    }
-    else
-    if (address>=0x20000)
-        state.m_vram->set(address-0x10000,val);
+        if (address>=0x10000 && address<0x20000) {
+            m_img.bits()[(address-0x10000)*4+2]=val;
+        }
+        else
+            if (address>=0x20000)
+                state.m_vram->set(address-0x10000,val);
 
+}
+
+void OKVC::writeMemFilter(int address, uchar val)
+{
+    if ((state.m_pram->get(p_curBlitType)&BLIT_ALPHA)==BLIT_ALPHA) {
+        if (val == state.m_pram->get(p_curBlitTypeVal))
+            return;
+    }
+
+    if ((state.m_pram->get(p_curBlitType)&BLIT_ADD)==BLIT_ADD) {
+        val+=readMem(address);
+    }
+    writeMem(address,val);
 }
 
 void OKVC::MemCpyOKVC(int hh1, int h1, int l1, int hh2, int h2, int l2, int hc, int lc)
@@ -210,7 +220,7 @@ void OKVC::MemCpyOKVC(int hh1, int h1, int l1, int hh2, int h2, int l2, int hc, 
 //    qDebug() << "memcpyOKVC from / to: " << Util::numToHex(from)<< ", " <<Util::numToHex(to) << "   len = " <<Util::numToHex(len);
 
     for (int i=0;i<len;i++)
-        writeMem(to+i, readMem(from+i));
+        writeMemFilter(to+i, readMem(from+i));
 }
 
 
@@ -237,19 +247,11 @@ void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
             int sy = yy+py1;
             int tx = xx+px2;
             int ty = yy+py2;
-            uchar c = 0;
-
-            c = state.m_vram->get(sx+sy*256);
-//            if (sy<256) // in Screen ram
-            if (sx>=0 && sx<256 && sy>=0 && sy<256)
-                c = m_img.pixelColor(sx,sy).red();
-
-            state.m_vram->set(tx+ty*256,c);
-
-//            if (ty<256) // in Screen ram
-            if (tx>=0 && tx<256 && ty>=0 && ty<256)
-                m_img.setPixelColor(tx,ty,QColor(c,0,0));
-        }
+            int sourceAddress = sx+sy*256;
+            int targetAddress = tx+ty*256;
+            uchar c = readMem(sourceAddress);
+            writeMem(targetAddress,c);
+    }
 }
 
 void OKVC::Rect(int x1, int y1, int w, int h,uchar c)
@@ -293,7 +295,7 @@ void OKVC::BlitFont(int fontsizeX, int fontsizeY, int chr, int col, int px, int 
             c = state.m_vram->get(base + sx+sy*256);
 
 
-            if (c!=0) {
+            if (c!=state.m_pram->get(p_curBlitTypeVal)) {
                 state.m_vram->set(tx+ty*256,col);
 
 //            if (ty<256) // in Screen ram

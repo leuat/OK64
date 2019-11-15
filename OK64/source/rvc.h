@@ -9,6 +9,7 @@
 #include "source/okmemory.h"
 #include "source/6502/impl.h"
 #include "source/misc/util.h"
+
 class OKVC_State {
 public:
     bool m_waitForVSYNC = false;
@@ -23,6 +24,9 @@ public:
 class OKVC
 {
 public:
+    const int BLIT_ALPHA = 0b00000001;
+    const int BLIT_ADD = 0b00000010;
+
     const int p_time = 0xFFF0;
     const int p_vsync = 0xFFEF;
     const int p_fontBank = 0xFFEE;
@@ -36,6 +40,10 @@ public:
     const int p_srcPage = 0xFFE7;
     const int p_dstPage = 0xFFE6;
     const int p_curStrip = 0xFFE5;
+    const int p_curBlitType = 0xFFE4;
+    const int p_curBlitTypeVal = 0xFFE3;
+
+
     const int p_strip = 0xFE00;
 
     const int p_inputInterrupt = 0xFFF8;
@@ -104,6 +112,7 @@ public:
 
     uchar readMem(int address);
     void writeMem(int address, uchar val);
+    void writeMemFilter(int address, uchar val);
     void DrawLine(int x1, int y1, int x2, int y2, uchar color);
     void MemCpyOKVC(int hh1, int h1, int l1, int hh2, int h2, int l2, int hc, int lc);
     void Blit(int x1, int y1, int x2, int y2, int w, int h);
