@@ -45,6 +45,7 @@ public:
 
 
     const int p_strip = 0xFE00;
+    const int p_sid = 0xFF20;
 
     const int p_inputInterrupt = 0xFFF8;
 

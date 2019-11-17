@@ -151,30 +151,11 @@ void RComputer::onAudio()
 
 //    return;
     for (int i=0;i<0x20;i++)
-        m_sid.write(i,m_pram.get(0xD400+i));
+        m_sid.write(i,m_pram.get(m_okvc.p_sid+i));
 
 //    qDebug() << s;
     cycle_count csdelta = 1.0*((float)m_mhz / ((float)m_khz));
-//    int pp = m_audio.m_input->pos();
-//    qDebug() << pp;
-//#pragma omp parallel for
-
-//    m_soundPos = 160+((QInfiniteBuffer*)m_audio.m_input)->getPos();
-   /* int old = m_audio.m_curPos;
-    m_audio.m_curPos = m_audio.m_input->pos();//  ((QInfiniteBuffer*)m_audio.m_input)->getPos();
-    qDebug() << m_audio.m_curPos;
-    if (m_audio.m_curPos != old)
-    {
-//        m_soundPos = m_audio.m_curPos;
-    }
-*/
     int size = m_audio.m_size*4*(int)(m_audio.m_bufscale);
-
-/*    if (m_audio.m_input->pos()>m_audio.m_soundPos) {
-        qDebug() << "CHOP CHOP" <<  m_audio.m_input->pos() << " > " << m_audio.m_soundPos;;
-        m_audio.m_soundPos = (m_audio.m_input->pos());
-    }
-*/
     if (m_audio.m_reset==1) {
 
         m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;
@@ -186,16 +167,6 @@ void RComputer::onAudio()
 //       m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;;
         m_audio.m_reset = 0;
     }
-
-/*    int delta = 1600;
-    if (m_audio.m_orgPos!=m_audio.m_input->pos()+delta) {
-        m_audio.m_orgPos = m_audio.m_input->pos()+delta;
-        m_audio.m_soundPos = m_audio.m_orgPos;
-        qDebug() << " RESET ";
-    }
-*/
-//    qDebug()<< "UPDATE : " <<m_audio.m_soundPos << " VS " << m_audio.m_input->pos();
-
 
 
     for (int i=0;i<m_audio.m_size;i++) {
