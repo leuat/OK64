@@ -69,10 +69,11 @@ public:
     AThread m_aThread;
     int m_size = 0;
     int m_curPos = 0;
-    float m_bufscale = 64;
+    float m_bufscale = 1024;
     int m_cur = 0;
    // QInfiniteBuffer* m_input;
-    QInfiniteBuffer* m_input = nullptr;
+//    QInfiniteBuffer* m_input = nullptr;
+    QBuffer* m_input = nullptr;
     void CopyBuffer();
     void Init(int samplerate, float dur);
 

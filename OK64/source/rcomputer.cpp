@@ -98,6 +98,7 @@ void RComputer::Execute()
         QElapsedTimer timer;
         timer.start();
         onAudio();
+//        emit emitAudio();
         HandleInput();
         m_okvc.PrepareRaster();
         if (m_run) {
@@ -160,12 +161,16 @@ void RComputer::onAudio()
 
 //    m_soundPos = 160+((QInfiniteBuffer*)m_audio.m_input)->getPos();
     int old = m_audio.m_curPos;
-    m_audio.m_curPos = ((QInfiniteBuffer*)m_audio.m_input)->getPos();
-
+    m_audio.m_curPos = m_audio.m_input->pos();//  ((QInfiniteBuffer*)m_audio.m_input)->getPos();
+    qDebug() << m_audio.m_curPos;
     if (m_audio.m_curPos != old)
+    {
         m_soundPos = m_audio.m_curPos;
+    }
 
-    m_soundPos += m_audio.m_size*4-16;
+    m_soundPos += m_audio.m_size*4;//-16;
+
+
     int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
 #ifdef _WIN32
     for (int i=0;i<m_audio.m_size;i++) {
@@ -181,7 +186,7 @@ void RComputer::onAudio()
         m_sid.clock(csdelta);
         int v = m_sid.output();
         float sample = (float)v/65536.0;
-//        sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
+    //    sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
         int j = (size+ i*4 + m_soundPos)%(size);// + m_audio.m_cur*4*s;
         m_audio.m_soundBuffer[j+0] = *ptr;
@@ -228,7 +233,8 @@ void RAudio::Init(int samplerate, float dur) {
     audio = new QAudioOutput(audioFormat, this);
 //    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 //      m_input = new QInfiniteBuffer(&m_tempSoundBuffer,nullptr);
-      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
+//      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
+      m_input = new QBuffer(&m_soundBuffer,nullptr);
       m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
 
 /*      m_aThread.audio = audio;
@@ -248,11 +254,11 @@ void RAudio::handleStateChanged(QAudio::State newState)
 
     if (newState==QAudio::IdleState && !done) {
 //            qDebug()<< "IDLE";
-//          audio->reset();
+ //         audio->reset();
 //            audio->setNotifyInterval(10000);
 //            audio->
-   //       m_input->seek(0);
-  //        audio->start(m_input);
+          m_input->seek(0);
+          audio->start(m_input);
     }
     if (done) {
   //      qDebug() << "DONE";
@@ -273,11 +279,12 @@ qint64 QInfiniteBuffer::readData(char *output, qint64 maxlen)
            qint64 sizetocopy=maxlen-outputpos;
            if((maxlen-outputpos)>(d.size()-m_pos))
                sizetocopy=d.size()-m_pos;
+
            memcpy(output,d.constData()+m_pos,sizetocopy);
            outputpos+=sizetocopy;
-           m_pos+=sizetocopy;
-           if(m_pos>=d.size())
-               m_pos=0;
+           m_pos=(m_pos+sizetocopy)%d.size();
+ //          if(m_pos>=d.size())
+   //            m_pos=0;
        } while(outputpos<maxlen);
 
        return maxlen;
