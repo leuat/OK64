@@ -160,13 +160,16 @@ void RComputer::onAudio()
 //#pragma omp parallel for
 
 //    m_soundPos = 160+((QInfiniteBuffer*)m_audio.m_input)->getPos();
-    int old = m_audio.m_curPos;
+   /* int old = m_audio.m_curPos;
     m_audio.m_curPos = m_audio.m_input->pos();//  ((QInfiniteBuffer*)m_audio.m_input)->getPos();
     qDebug() << m_audio.m_curPos;
     if (m_audio.m_curPos != old)
     {
-        m_soundPos = m_audio.m_curPos;
+//        m_soundPos = m_audio.m_curPos;
     }
+*/
+    if (m_soundPos==-1)
+        m_soundPos = m_audio.m_input->pos()+32;
 
     m_soundPos += m_audio.m_size*4;//-16;
 

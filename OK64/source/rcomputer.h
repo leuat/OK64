@@ -69,7 +69,7 @@ public:
     AThread m_aThread;
     int m_size = 0;
     int m_curPos = 0;
-    float m_bufscale = 1024;
+    float m_bufscale = 512;
     int m_cur = 0;
    // QInfiniteBuffer* m_input;
 //    QInfiniteBuffer* m_input = nullptr;
@@ -90,7 +90,7 @@ public:
     QPixmap m_outPut;
     bool m_abort = false;
     bool m_run = false;
-    qint64 m_soundPos;
+    qint64 m_soundPos = -1;
     int m_mhz = 985000; // mhz
     int m_fps = 50; // hz
 //    int m_khz = 44100;
