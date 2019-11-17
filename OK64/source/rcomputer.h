@@ -67,9 +67,11 @@ public:
     QByteArray m_tempSoundBuffer;
     QAudioOutput* audio;
     AThread m_aThread;
+    int m_reset = 1;
     int m_size = 0;
-    int m_curPos = 0;
-    float m_bufscale = 256;
+    qint64 m_soundPos,m_orgPos = -1;
+//    float m_bufscale = 51200;
+    float m_bufscale = 15120;
     int m_cur = 0;
    // QInfiniteBuffer* m_input;
 //    QInfiniteBuffer* m_input = nullptr;
@@ -90,7 +92,6 @@ public:
     QPixmap m_outPut;
     bool m_abort = false;
     bool m_run = false;
-    qint64 m_soundPos = -1;
     int m_mhz = 985000; // mhz
     int m_fps = 50; // hz
 //    int m_khz = 44100;

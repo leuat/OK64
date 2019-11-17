@@ -168,15 +168,36 @@ void RComputer::onAudio()
 //        m_soundPos = m_audio.m_curPos;
     }
 */
-    if (m_soundPos==-1) {
-        m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*24;
-//        qDebug()<< "INIT : " <<m_soundPos;
+    int size = m_audio.m_size*4*(int)(m_audio.m_bufscale);
+
+/*    if (m_audio.m_input->pos()>m_audio.m_soundPos) {
+        qDebug() << "CHOP CHOP" <<  m_audio.m_input->pos() << " > " << m_audio.m_soundPos;;
+        m_audio.m_soundPos = (m_audio.m_input->pos());
+    }
+*/
+    if (m_audio.m_reset==1) {
+
+        m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;
+   //     qDebug()<< "INIT : " <<m_audio.m_soundPos;
+        m_audio.m_reset = 0;
+    }
+    if (m_audio.m_reset==2) {
+
+//       m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;;
+        m_audio.m_reset = 0;
     }
 
-  //  qDebug()<< "UPDATE : " <<m_soundPos << " VS " << m_audio.m_input->pos();
+/*    int delta = 1600;
+    if (m_audio.m_orgPos!=m_audio.m_input->pos()+delta) {
+        m_audio.m_orgPos = m_audio.m_input->pos()+delta;
+        m_audio.m_soundPos = m_audio.m_orgPos;
+        qDebug() << " RESET ";
+    }
+*/
+//    qDebug()<< "UPDATE : " <<m_audio.m_soundPos << " VS " << m_audio.m_input->pos();
 
 
-    int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
+
     for (int i=0;i<m_audio.m_size;i++) {
 
         m_sid.clock(csdelta);
@@ -184,14 +205,14 @@ void RComputer::onAudio()
         float sample = (float)v/65536.0;
     //    sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
         char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
-        int j = (size+ i*4 + m_soundPos)%(size);// + m_audio.m_cur*4*s;
+        int j = (size+ i*4 + m_audio.m_soundPos)%(size);// + m_audio.m_cur*4*s;
         m_audio.m_soundBuffer[j+0] = *ptr;
         m_audio.m_soundBuffer[j+1] = *(ptr + 1);
         m_audio.m_soundBuffer[j+2] = *(ptr + 2);
         m_audio.m_soundBuffer[j+3] = *(ptr + 3);
     }
 
-    m_soundPos=(m_soundPos + 4*m_audio.m_size)%size;
+    m_audio.m_soundPos=(m_audio.m_soundPos + 4*m_audio.m_size)%size;
     m_audioAction=false;
 
 }
@@ -255,6 +276,7 @@ void RAudio::handleStateChanged(QAudio::State newState)
 //            audio->
           m_input->seek(0);
           audio->start(m_input);
+          m_reset = 2;
     }
     if (done) {
   //      qDebug() << "DONE";
