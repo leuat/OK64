@@ -168,23 +168,16 @@ void RComputer::onAudio()
 //        m_soundPos = m_audio.m_curPos;
     }
 */
-    if (m_soundPos==-1)
-        m_soundPos = m_audio.m_input->pos()+32;
+    if (m_soundPos==-1) {
+        m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*24;
+//        qDebug()<< "INIT : " <<m_soundPos;
+    }
 
-    m_soundPos += m_audio.m_size*4;//-16;
+  //  qDebug()<< "UPDATE : " <<m_soundPos << " VS " << m_audio.m_input->pos();
 
 
     int size = m_audio.m_size*4*(int)m_audio.m_bufscale;
-#ifdef _WIN32
     for (int i=0;i<m_audio.m_size;i++) {
-#endif
-#ifdef __linux__
-
-  //      qDebug() << ((QInfiniteBuffer*)m_audio.m_input)->getPos() << " vs " << m_audio.m_size;
-
-        for (int i=0;i<m_audio.m_size*1;i++) {
-
-#endif
 
         m_sid.clock(csdelta);
         int v = m_sid.output();
@@ -198,7 +191,7 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+3] = *(ptr + 3);
     }
 
-
+    m_soundPos=(m_soundPos + 4*m_audio.m_size)%size;
     m_audioAction=false;
 
 }
