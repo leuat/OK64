@@ -90,6 +90,7 @@ class RComputer : public QThread
 public:
     RComputer();
     QPixmap m_outPut;
+    bool isFirst = true;
     bool m_abort = false;
     bool m_run = false;
     int m_mhz = 985000; // mhz
@@ -98,6 +99,7 @@ public:
     int m_khz = 44100;
     int m_cyclesPerFrame = m_mhz/m_fps;
     int m_time = 0;
+    int m_bpp = 4;
     int m_currentKey = 0;
     bool m_audioAction = false;
     bool m_outputBusy = false;

@@ -42,6 +42,9 @@ public:
     const int p_curStrip = 0xFFE5;
     const int p_curBlitType = 0xFFE4;
     const int p_curBlitTypeVal = 0xFFE3;
+    const int p_channel1Vol = 0xFFE1;
+    const int p_channel2Vol = 0xFFE2;
+    const int p_outVal = 0xFFE0;
 
 
     const int p_strip = 0xFE00;
@@ -74,6 +77,7 @@ public:
     const int p_drawPoly = 12;
     const int p_memcpy = 13;
     const int p_setDefaultPalette = 14;
+    const int p_signMul = 15;
 //    QRandomGenerator* m_rand;
     OKVC();
     QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";

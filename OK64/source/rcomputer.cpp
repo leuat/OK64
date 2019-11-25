@@ -53,6 +53,7 @@ void RComputer::PowerOn()
     m_cpu.Initialize(&m_pram);
     m_cpu.LoadOpcodes();
     m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
+
 }
 
 void RComputer::Reset()
@@ -90,10 +91,11 @@ void RComputer::run()
 
 void RComputer::Execute()
 {
-    sleep((1/100.0));
-    onAudio();
+//    sleep((1/100.0));
+  //  onAudio();
     int time = 0;
-//    m_cpu.m_impl->pc = 0x400;
+//    m_cpu.m_impl->pc = 0x400
+
     while (!m_abort) {
         QElapsedTimer timer;
         timer.start();
@@ -155,35 +157,41 @@ void RComputer::onAudio()
 
 //    qDebug() << s;
     cycle_count csdelta = 1.0*((float)m_mhz / ((float)m_khz));
-    int size = m_audio.m_size*4*(int)(m_audio.m_bufscale);
+    int size = m_audio.m_size*m_bpp*(int)(m_audio.m_bufscale);
     if (m_audio.m_reset==1) {
+        if (isFirst) {
+//            m_audio.audio->reset();
+            m_audio.m_input->seek(0);
+//            audio->start(m_input);
 
-        m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;
-   //     qDebug()<< "INIT : " <<m_audio.m_soundPos;
+            isFirst = false;
+        }
+
+        m_audio.m_soundPos = m_audio.m_input->pos()+m_bpp*m_audio.m_size*16;
         m_audio.m_reset = 0;
     }
     if (m_audio.m_reset==2) {
-
-//       m_audio.m_soundPos = m_audio.m_input->pos()+4*m_audio.m_size*16;;
         m_audio.m_reset = 0;
     }
-
+//    qDebug() << m_audio.m_input->pos() << " vs " << m_audio.m_soundPos;
 
     for (int i=0;i<m_audio.m_size;i++) {
 
         m_sid.clock(csdelta);
-        int v = m_sid.output();
-        float sample = (float)v/65536.0;
-    //    sample = sin((i)*(0.1*(sin(m_time/10.0)+1)))*0.2;
-        char *ptr = (char*)(&sample);  // assign a char* pointer to the address of this data sample
-        int j = (size+ i*4 + m_audio.m_soundPos)%(size);// + m_audio.m_cur*4*s;
-        m_audio.m_soundBuffer[j+0] = *ptr;
-        m_audio.m_soundBuffer[j+1] = *(ptr + 1);
-        m_audio.m_soundBuffer[j+2] = *(ptr + 2);
-        m_audio.m_soundBuffer[j+3] = *(ptr + 3);
+
+
+        int c1 = m_sid.output()*m_pram.get(m_okvc.p_channel1Vol)/255.0;
+        int c2 = m_sid.output()*m_pram.get(m_okvc.p_channel2Vol)/255.0;
+        char *ptr1 = (char*)(&c1);
+        char *ptr2 = (char*)(&c2);
+        int j = (size+ i*m_bpp + m_audio.m_soundPos)%(size);// + m_audio.m_cur*4*s;
+        m_audio.m_soundBuffer[j+0] = *ptr1;
+        m_audio.m_soundBuffer[j+1] = *(ptr1 + 1);
+        m_audio.m_soundBuffer[j+2] = *ptr2;
+        m_audio.m_soundBuffer[j+3] = *(ptr2 + 1);
     }
 
-    m_audio.m_soundPos=(m_audio.m_soundPos + 4*m_audio.m_size)%size;
+    m_audio.m_soundPos=(m_audio.m_soundPos + m_bpp*m_audio.m_size)%size;
     m_audioAction=false;
 
 }
@@ -206,11 +214,12 @@ void RAudio::Init(int samplerate, float dur) {
     m_tempSoundBuffer.resize(n*4*m_bufscale);
     m_tempSoundBuffer.fill(0);
     audioFormat.setSampleRate(static_cast<int>(sampleRate));
-    audioFormat.setChannelCount(1);
-    audioFormat.setSampleSize(32);   // set the sample size in bits. We set it to 32 bis, because we set SampleType to float (one float has 4 bytes ==> 32 bits)
+    audioFormat.setChannelCount(2);
+    audioFormat.setSampleSize(16);   // set the sample size in bits. We set it to 32 bis, because we set SampleType to float (one float has 4 bytes ==> 32 bits)
     audioFormat.setCodec("audio/pcm");
     audioFormat.setByteOrder(QAudioFormat::LittleEndian);
-    audioFormat.setSampleType(QAudioFormat::Float);   // use Float, to have a better resolution than SignedInt or UnSignedInt
+//    audioFormat.setSampleType(QAudioFormat::Float);   // use Float, to have a better resolution than SignedInt or UnSignedInt
+    audioFormat.setSampleType(QAudioFormat::SignedInt);   // use Float, to have a better resolution than SignedInt or UnSignedInt
     QAudioDeviceInfo deviceInfo(QAudioDeviceInfo::defaultOutputDevice());
     if(!deviceInfo.isFormatSupported(audioFormat))
     {

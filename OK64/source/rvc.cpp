@@ -95,6 +95,8 @@ void OKVC::Defaults()
     state.m_pram->set(p_inputInterrupt+1,0);
     state.m_pram->set(p_curBlitType,0);
     state.m_pram->set(p_curBlitTypeVal,0);
+    state.m_pram->set(p_channel1Vol,0xff);
+    state.m_pram->set(p_channel2Vol,0xff);
 }
 
 void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
@@ -150,7 +152,7 @@ void OKVC::DrawCircle(int x, int y, int radius, uchar color, bool fill)
     painter.begin(&m_img);
     painter.setPen(QPen(QColor(color,0,0), 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
     painter.setBrush(QColor(color,0,0));
-    painter.drawEllipse(x,y,radius,radius);
+    painter.drawEllipse(x-radius/2,y-radius/2,radius,radius);
     painter.end();
 }
 
@@ -345,6 +347,12 @@ void OKVC::Update()
     }
     if (get(p_exec)==p_setDefaultPalette) {
         SetDefaultPalette();
+    }
+    if (get(p_exec)==p_signMul) {
+        //MemCpyOKVC(get(p_p1_x), get(p_p1_y), get(p_p1_c), get(p_p1_3),get(p_p2_x),get(p_p2_y),  get(p_p2_c),get(p_p2_3));
+        set(p_outVal,((char)(get(p_p1_x))*((float)((char)get(p_p1_y)/128.0))));
+//        set(p_outVal,0);
+
     }
 
     if (get(p_exec)==p_resetFileList)
