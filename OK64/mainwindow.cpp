@@ -128,7 +128,7 @@ void MainWindow::UpdateStatus()
     // Smoothen workload
     if (m_workLoad == 0.0)
         m_workLoad = m_computer.m_workLoad;
-    m_workLoad = m_workLoad*0.98 + m_computer.m_workLoad*0.02;
+    m_workLoad = m_workLoad*0.95 + m_computer.m_workLoad*0.05;
     out+="<br>Workload : " + QString::number((int)m_workLoad) + "%";
     ui->txtStatus->setText(out);
 }
@@ -195,6 +195,9 @@ void MainWindow::onEmitOutput()
 //    qDebug() << m_count;
     if (m_computer.m_abort)
         return;
+
+
+
     m_computer.m_outputBusy=true;
 //    m_computer.m_okvc.GenerateOutputSignal();
     m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen, Qt::AutoColor);

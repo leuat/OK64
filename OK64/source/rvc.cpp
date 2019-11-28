@@ -438,7 +438,7 @@ void OKVC::GenerateOutputSignal()
     int w = m_screen.width();
 
     for (int y=0;y<m_screen.height();y++)
-//        #pragma omp parallel for
+        #pragma omp parallel for
         for (int x=0;x<w;x++) {
             int pos = y*w+x;
 

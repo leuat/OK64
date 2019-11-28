@@ -72,6 +72,7 @@ public:
     qint64 m_soundPos,m_orgPos = -1;
 //    float m_bufscale = 51200;
     float m_bufscale = 15120;
+ //   float m_bufscale = 16;
     int m_cur = 0;
    // QInfiniteBuffer* m_input;
 //    QInfiniteBuffer* m_input = nullptr;
