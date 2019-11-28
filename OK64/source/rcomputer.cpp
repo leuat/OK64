@@ -66,7 +66,7 @@ void RComputer::Reset()
 int RComputer::LoadProgram(QString fn)
 {
     m_okvc.LoadRom(fn,0,true);
-
+    m_cpu.m_impl->pc = 0x400;
     m_okvc.VRAMtoScreen();
 
     return 0;
@@ -95,12 +95,12 @@ void RComputer::Execute()
   //  onAudio();
     int time = 0;
 //    m_cpu.m_impl->pc = 0x400
-    m_audio.m_input->seek(0);
+  //  m_audio.m_input->seek(0);
+    int cnt = 1;
   while (!m_abort) {
         QElapsedTimer timer;
         timer.start();
-//        onAudio();
-        emit emitAudio();
+  //      onAudio();
         HandleInput();
         m_okvc.PrepareRaster();
         if (m_run) {
@@ -111,6 +111,7 @@ void RComputer::Execute()
         }
 
         m_workLoad = m_cpu.m_cycles/((float)m_cyclesPerFrame)*100.0;
+        emit emitAudio();
 
         m_time++;
         //m_okvc.m_backbuffer = QImage(m_okvc.m_img);
@@ -121,13 +122,13 @@ void RComputer::Execute()
             if (!m_outputBusy)
                 emit emitOutput();
 
-
-
-            int slp = 1;
-
+            long slp = 1;
+            cnt = 0;
             while (slp>0) {
-                slp = (int)(m_mhz/m_fps) -  (float)timer.nsecsElapsed()/1000.0;
+                slp = (m_mhz/m_fps) -  (float)timer.nsecsElapsed()/1000.0;
+                cnt++;
             }
+            qDebug() << cnt;
 
         }
 
@@ -154,14 +155,12 @@ void RComputer::onAudio()
     int size = m_audio.m_size*m_bpp*(int)(m_audio.m_bufscale);
     if (m_audio.m_reset==1) {
         if (isFirst) {
-//            m_audio.audio->reset();
             m_audio.m_input->seek(0);
-//            audio->start(m_input);
 
             isFirst = false;
         }
         m_audio.m_soundPos = m_audio.m_input->pos()+m_bpp*m_audio.m_size*16;
-//        return;
+
         m_audio.m_reset = 0;
     }
     if (m_audio.m_reset==2) {
@@ -176,7 +175,8 @@ void RComputer::onAudio()
         int c2 = m_sid.output()*m_pram.get(m_okvc.p_channel2Vol)/255.0;
         char *ptr1 = (char*)(&c1);
         char *ptr2 = (char*)(&c2);
-        int j = (size+ i*m_bpp + m_audio.m_soundPos-m_bpp*44100)%(size);// + m_audio.m_cur*4*s;
+//        int j = (size+ i*m_bpp + m_audio.m_soundPos-m_bpp*44100)%(size);// + m_audio.m_cur*4*s;
+        int j = (size+ i*m_bpp + m_audio.m_soundPos)%(size);// + m_audio.m_cur*4*s;
         m_audio.m_soundBuffer[j+0] = *ptr1;
         m_audio.m_soundBuffer[j+1] = *(ptr1 + 1);
         m_audio.m_soundBuffer[j+2] = *ptr2;

@@ -5,8 +5,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
-    w.m_computer.m_run =false;
-    w.Reset();
     int c=1;
     if (argc!=1) {
 //        qDebug() << "Argc " << argc;
@@ -26,13 +24,14 @@ int main(int argc, char *argv[])
         }
         QString file = argv[c];
         w.m_computer.LoadProgram(file);
-        w.m_computer.m_run =true;
     }
     else {
 
-        w.Reset();
+//        w.Reset();
 
     }
+    w.m_computer.start();
+
     w.show();
     return a.exec();
 }

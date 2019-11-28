@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_computer.PowerOn();
 
 
-    m_computer.start();
 
     ui->txtStatus->setVisible(false);
     ui->txtOutput->setVisible(false);
@@ -38,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui->widget->showFullScreen();
 //    showFullScreen();
 //    ui->widget->setMaximumWidth(ui->widget->height()*1.2);
+     Reset();
+
 }
 
 MainWindow::~MainWindow()
