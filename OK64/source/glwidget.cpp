@@ -54,7 +54,9 @@ void GLWidget::paintGL()
     m_program->setUniformValue("lamp",lamp);
     m_program->setUniformValue("saturation",saturation);
     m_program->setUniformValue("gamma",gamma);
+    m_program->setUniformValue("time",time);
 
+    time++;
     GLfloat vertices[]{ -1.0f, -1.0f,
                         1.0f, -1.0f,
                         -1.0f,  1.0f,

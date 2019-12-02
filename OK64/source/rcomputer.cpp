@@ -91,16 +91,11 @@ void RComputer::run()
 
 void RComputer::Execute()
 {
-//    sleep((1/100.0));
-  //  onAudio();
     int time = 0;
-//    m_cpu.m_impl->pc = 0x400
-  //  m_audio.m_input->seek(0);
     int cnt = 1;
-  while (!m_abort) {
+    while (!m_abort) {
         QElapsedTimer timer;
         timer.start();
-  //      onAudio();
         HandleInput();
         m_okvc.PrepareRaster();
         if (m_run) {
@@ -114,7 +109,6 @@ void RComputer::Execute()
         emit emitAudio();
 
         m_time++;
-        //m_okvc.m_backbuffer = QImage(m_okvc.m_img);
         if (!m_abort) {
             time++;
 
@@ -128,12 +122,11 @@ void RComputer::Execute()
                 slp = (m_mhz/m_fps) -  (float)timer.nsecsElapsed()/1000.0;
                 cnt++;
             }
-            qDebug() << cnt;
 
         }
 
 
-    }
+  }
 
     m_audio.done = true;
     //   qDebug() << "Thread DONE";

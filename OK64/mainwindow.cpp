@@ -171,7 +171,7 @@ void MainWindow::Fit()
     bool visible = ui->txtOutput->isVisible();
     ui->hlMain->setStretch(0,1);
     ui->hlMain->setStretch(1,1*visible);
-    setFixedSize(800*(visible+1),900);
+    setFixedSize(900*(visible+1),900);
 
 }
 
