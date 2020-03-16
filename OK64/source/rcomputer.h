@@ -10,6 +10,9 @@
 #ifdef __linux__
 #include "resid/sid.h"
 #endif
+#ifdef __APPLE__
+#include <resid/sid.h>
+#endif
 #ifdef _WIN32
 #include "resid_win/sid.h"
 #endif
@@ -116,6 +119,9 @@ public:
     SIDD m_sid;
 #endif
 #ifdef __linux__
+    SID m_sid;
+#endif
+#ifdef __APPLE__
     SID m_sid;
 #endif
     OKMemory m_vram;
