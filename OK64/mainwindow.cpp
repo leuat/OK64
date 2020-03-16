@@ -305,3 +305,23 @@ void MainWindow::on_sldChrom_valueChanged(int value)
 {
     UpdateShader();
 }
+
+void MainWindow::on_actionLoad_prorgram_from_file_triggered()
+{
+   QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open .prg file"), "", tr("OK64 programs (*.prg)"));
+   if (fileName=="")
+       return;
+   m_computer.LoadProgram(fileName);
+
+}
+
+void MainWindow::on_action_Reset_system_triggered()
+{
+    Reset();
+}
+
+void MainWindow::on_action_Quit_triggered()
+{
+    QApplication::exit(0);
+}

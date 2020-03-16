@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include "source/rcomputer.h"
 #include "source/misc/util.h"
+#include <QFileDialog>
 
 namespace Ui {
 class MainWindow;
@@ -48,6 +49,9 @@ private slots:
     void on_sldGamma_valueChanged(int value);
     void on_sldScan_valueChanged(int value);
     void on_sldChrom_valueChanged(int value);
+    void on_actionLoad_prorgram_from_file_triggered();
+    void on_action_Reset_system_triggered();
+    void on_action_Quit_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -97,7 +97,7 @@
              <attribute name="title">
               <string>Screen</string>
              </attribute>
-             <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,1,1,0,0">
+             <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,1,1,0">
               <item row="0" column="2">
                <widget class="QLabel" name="label_4">
                 <property name="text">
@@ -228,9 +228,18 @@
      <x>0</x>
      <y>0</y>
      <width>700</width>
-     <height>28</height>
+     <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_prorgram_from_file"/>
+    <addaction name="action_Reset_system"/>
+    <addaction name="action_Quit"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -241,6 +250,21 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionLoad_prorgram_from_file">
+   <property name="text">
+    <string>&amp;Open program</string>
+   </property>
+  </action>
+  <action name="action_Reset_system">
+   <property name="text">
+    <string>&amp;Reset system</string>
+   </property>
+  </action>
+  <action name="action_Quit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

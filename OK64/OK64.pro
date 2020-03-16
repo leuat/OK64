@@ -55,10 +55,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 win32-msvc*{
     QMAKE_CXXFLAGS += -openmp
-    LIBS += -openmp -opengl
+    LIBS += -openmp
     QMAKE_CXXFLAGS += -O3
     LIBS += -L$$PWD/libs/ -lresid
-    LIBS   += -lopengl32
+    LIBS   += -lopengl32 -lopengl
     #LIBS   += -lglu32
     #LIBS   += -lglut32
 #   QMAKE $$PWD\..\..\TRSE\Publish\tutorials\OK64\KOS\kos.prg $$PWD/resources/rom/

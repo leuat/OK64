@@ -58,13 +58,18 @@ void RComputer::PowerOn()
 
 void RComputer::Reset()
 {
+    m_run=false;
     m_cpu.Initialize(&m_pram);
     m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
+//    m_audio.Init(m_khz,1.0/m_fps);
+    m_audio.m_reset = 1;
+    m_run = true;
 
 }
 
 int RComputer::LoadProgram(QString fn)
 {
+    Reset();
     m_okvc.LoadRom(fn,0,true);
     m_cpu.m_impl->pc = 0x400;
     m_okvc.VRAMtoScreen();
@@ -192,8 +197,9 @@ void RAudio::Init(int samplerate, float dur) {
     float sampleRate = samplerate;   // sample rate
     float duration = dur;     // duration in seconds
     int n  = int(duration * sampleRate);   // number of data samples
-
+//    m_soundPos = 0;
     m_size = n;
+    m_soundPos = 0;
     m_soundBuffer.resize(n*4*m_bufscale);
     m_soundBuffer.fill(0);
     m_tempSoundBuffer.resize(n*4*m_bufscale);
@@ -211,8 +217,8 @@ void RAudio::Init(int samplerate, float dur) {
         qWarning() << "Raw audio format not supported by backend, cannot play audio.";
         return;
     }
-
-    audio = new QAudioOutput(audioFormat, this);
+    if (audio==nullptr)
+        audio = new QAudioOutput(audioFormat, this);
 //    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 //      m_input = new QInfiniteBuffer(&m_tempSoundBuffer,nullptr);
 //      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
@@ -223,6 +229,8 @@ void RAudio::Init(int samplerate, float dur) {
       m_aThread.buf = m_input;
       m_aThread.start();
       m_aThread.run();*/
+
+      audio->reset();
       audio->start(m_input);
       connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 }

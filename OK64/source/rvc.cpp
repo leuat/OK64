@@ -252,7 +252,7 @@ void OKVC::Blit(int x1, int y1, int x2, int y2, int w, int h)
             int sourceAddress = sx+sy*256;
             int targetAddress = tx+ty*256;
             uchar c = readMem(sourceAddress);
-            writeMem(targetAddress,c);
+            writeMemFilter(targetAddress,c);
     }
 }
 
