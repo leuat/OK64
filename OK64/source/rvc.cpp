@@ -38,7 +38,10 @@ void OKVC::ResetFileList()
     m_listFiles.clear();
     m_currentFile = 0;
     InsertString("               ",p_fileLocation);
+    if (!m_currentDir.endsWith(QDir::separator()))
+        m_currentDir +=QDir::separator();
     QDir d(m_currentDir);
+
     if (!d.exists()) {
         InsertString("Invalid file directory",p_fileLocation);
         return;
@@ -48,6 +51,10 @@ void OKVC::ResetFileList()
         QString s = it.next();
         m_listFiles.append(s.split("/").last());
 //        qDebug() << it.next();
+    }
+    if (m_listFiles.count()==0) {
+        m_listFiles.append("No prg files found.");
+
     }
     InsertString(m_listFiles[m_currentFile],p_fileLocation);
 }
@@ -64,6 +71,8 @@ void OKVC::LoadFile()
 {
     QString f = "";
     int pos = p_fileLocation;
+    if (!m_currentDir.endsWith(QDir::separator()))
+        m_currentDir +=QDir::separator();
     while (state.m_pram->get(pos)!=0){
         f+=QChar(state.m_pram->get(pos));
         pos++;
@@ -268,7 +277,7 @@ void OKVC::Rect(int x1, int y1, int w, int h,uchar c)
 //            state.m_vram->set(tx+ty*256,c);
 
 //            if (ty<256) // in Screen ram
-  //          if (tx>=0 && tx<256 && ty>=0 && ty<256)
+            if (sx>=0 && sx<256 && sy>=0 && sy<256)
                 m_img.setPixelColor(sx,sy,QColor(c,0,0));
         }
 }

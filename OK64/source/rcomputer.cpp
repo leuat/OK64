@@ -73,6 +73,9 @@ int RComputer::LoadProgram(QString fn)
     m_okvc.LoadRom(fn,0,true);
     m_cpu.m_impl->pc = 0x400;
     m_okvc.VRAMtoScreen();
+    QString symFile = fn.remove(".prg") + ".sym";
+    if (QFile::exists(symFile))
+        m_cpu.LoadSybols(symFile);
 
     return 0;
 }

@@ -27,6 +27,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         source/6502/impl.cpp \
+        source/dialogabout.cpp \
         source/glwidget.cpp \
         source/okmemory.cpp \
         source/rvc.cpp \
@@ -37,6 +38,7 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         source/6502/impl.h \
+        source/dialogabout.h \
         source/glwidget.h \
         source/okmemory.h \
         source/rvc.h \
@@ -45,7 +47,8 @@ HEADERS += \
         source/rcomputer.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+        source/dialogabout.ui
 
 # Default rules for deployment.
 #qnx: target.path = /tmp/$${TARGET}/bin

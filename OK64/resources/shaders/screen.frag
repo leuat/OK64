@@ -56,7 +56,7 @@ void main()
     col = gt(pr,pg,pb);
   //  col.a = 1;
 
-    float noiseAmp = 0.07 + 0.01*random(vec2(time*1.231,0));
+    float noiseAmp = 0.01 + 0.004*random(vec2(time*1.231,0));
 
     col.r +=noiseAmp*random(v_pos*11.23+vec2(time*11.234,time*51.123));
     col.g +=noiseAmp*random(v_pos*11.23+vec2(time*11.234,time*51.123));

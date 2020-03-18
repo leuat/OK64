@@ -80,7 +80,7 @@ public:
     const int p_signMul = 15;
 //    QRandomGenerator* m_rand;
     OKVC();
-    QString m_currentDir = "/home/leuat/Dropbox/TRSE/Rhea/";
+    QString m_currentDir = "";
 
     void InsertString(QString s, int pos);
     int m_currentFile = 0;

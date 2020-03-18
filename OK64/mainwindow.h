@@ -6,6 +6,9 @@
 #include "source/rcomputer.h"
 #include "source/misc/util.h"
 #include <QFileDialog>
+#include <QSettings>
+#include "source/dialogabout.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -21,14 +24,19 @@ public:
     RComputer m_computer;
     QStringList m_commands;
     int m_count=0;
+    int m_size = 900;
     int m_prevPC;
+    QString m_version = "1.01";
     float m_workLoad;
     void DisplayProgram();
     void UpdateStatus();
-    void keyPressEvent(QKeyEvent *e);
+    void keyPressEvent(QKeyEvent *e) override;
     void SetDarkPalette();
     void Fit();
-    void Reset();
+    void DefaultUIValues();
+    QSettings* m_settings = nullptr;
+
+    void Reset(bool first=false);
     void ResetFocus();
 private:
     Ui::MainWindow *ui;
@@ -52,6 +60,14 @@ private slots:
     void on_actionLoad_prorgram_from_file_triggered();
     void on_action_Reset_system_triggered();
     void on_action_Quit_triggered();
+    void resizeEvent (QResizeEvent *event) override;
+    void on_action1280_triggered();
+    void on_action1024_triggered();
+    void on_action768_triggered();
+    void on_action512_triggered();
+    void on_btnSetDir_clicked();
+    void on_action640x640_triggered();
+    void on_actionAbout_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -11,13 +11,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&m_computer,SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(OnQuit()));
 
+
     m_computer.PowerOn();
 
+    this->setWindowTitle("OK64 version "+m_version);
+    QCoreApplication::setApplicationVersion(m_version);
+    QCoreApplication::setOrganizationDomain("lemonspawn.com");
+    QCoreApplication::setOrganizationName("LemonSpawn");
+    QCoreApplication::setApplicationName("OK64");
+    m_settings = new QSettings();
+    DefaultUIValues();
 
 
     ui->txtStatus->setVisible(false);
     ui->txtOutput->setVisible(false);
-
+    m_size = m_settings->value("ide/windowsize",768).toInt();
     Fit();
     //uielement->setFocusPolicy(Qt::NoFocus);
     //ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
@@ -37,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui->widget->showFullScreen();
 //    showFullScreen();
 //    ui->widget->setMaximumWidth(ui->widget->height()*1.2);
-     Reset();
+     Reset(true);
 
 }
 
@@ -136,6 +144,15 @@ void MainWindow::UpdateStatus()
 
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
+
+    if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
+        if (e->key()==Qt::Key_R) {
+            Reset();
+            return;
+        }
+    }
+
+
     if (e->text().count()==0)
         return;
     char c = e->key();
@@ -171,17 +188,45 @@ void MainWindow::Fit()
     bool visible = ui->txtOutput->isVisible();
     ui->hlMain->setStretch(0,1);
     ui->hlMain->setStretch(1,1*visible);
-    setFixedSize(900*(visible+1),900);
+    setFixedSize(m_size*(visible+1),m_size*1.2);
+    m_settings->setValue("ide/windowsize", m_size);
+}
+
+void MainWindow::DefaultUIValues()
+{
+    //qDebug() << "POES " <<m_settings->value("ui/sldcrt",40).toInt();
+    ui->sldCrt->setValue(m_settings->value("ui/sldcrt",40).toInt());
+    ui->sldSat->setValue(m_settings->value("ui/sldsat",50).toInt());
+    ui->sldGamma->setValue(m_settings->value("ui/sldgam",45).toInt());
+    ui->sldScan->setValue(m_settings->value("ui/sldscan",30).toInt());
+    ui->sldChrom->setValue(m_settings->value("ui/sldchrom",25).toInt());
+
+    ui->tabMain->setCurrentIndex(m_settings->value("ui/curtab",1).toInt());
+    ui->leDIr->setText(m_settings->value("ui/curdir","").toString());
+
+/*    m_settings->setValue("ui/sldsat",ui->sldSat->value());
+    m_settings->setValue("ui/sldgam",ui->sldGamma->value());
+    m_settings->setValue("ui/sldscan",ui->sldScan->value());
+    m_settings->setValue("ui/sldchrom",ui->sldChrom->value());
+    m_settings->setValue("ui/sldcrt",ui->sldCrt->value());
+  */
 
 }
 
-void MainWindow::Reset()
+void MainWindow::Reset(bool first)
 {
+    // Hard cap in reset
+    if (ui->widget->time<50 && ui->widget->time!=0.0)
+        return;
     m_computer.m_run =false;
+    m_computer.msleep(25);
+    QThread::msleep(25);
+
 
     m_computer.LoadProgram(":resources/rom/kos.prg");
     m_computer.Reset();
-
+    ui->widget->Reset();
+//    ui->widget->time = 0;
     m_computer.m_run =true;
 }
 
@@ -206,6 +251,7 @@ void MainWindow::onEmitOutput()
 //    ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
 
     ui->widget->setTexture(m_computer.m_okvc.m_screen);
+//    ui->widget->setFixedSize(m_size, m_size*0.9);
 
     if (ui->txtStatus->isVisible()) {
         if ((m_count&1)==0)
@@ -252,6 +298,9 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::onQuit()
 {
+//    m_settings.
+    m_settings->setValue("ui/curtab",ui->tabMain->currentIndex());
+
     m_computer.m_abort = true;
     m_computer.msleep(250);
     QThread::msleep(250);
@@ -260,6 +309,8 @@ void MainWindow::onQuit()
 void MainWindow::on_leDIr_textChanged(const QString &arg1)
 {
     m_computer.m_okvc.m_currentDir = arg1;
+    m_settings->setValue("ui/curdir",arg1);
+
 }
 
 void MainWindow::on_pushButton_3_clicked()
@@ -271,6 +322,7 @@ void MainWindow::on_pushButton_3_clicked()
 
 void MainWindow::on_sldCrt_valueChanged(int value)
 {
+    m_settings->setValue("ui/sldcrt",ui->sldCrt->value());
     UpdateShader();
 }
 
@@ -284,25 +336,31 @@ void MainWindow::UpdateShader()
     ui->widget->gamma = ui->sldGamma->value()/100.0*2; // 0-3
     ui->widget->lamp = ui->sldScan->value()/100.0*2; // 0-3
     ui->widget->chromatic = ui->sldChrom->value()/3000.0;
+
+//    qDebug() << m_settings->value("ui/sldcrt",40).toInt();
 }
 
 void MainWindow::on_sldSat_valueChanged(int value)
 {
+    m_settings->setValue("ui/sldsat",ui->sldSat->value());
     UpdateShader();
 }
 
 void MainWindow::on_sldGamma_valueChanged(int value)
 {
+    m_settings->setValue("ui/sldgam",ui->sldGamma->value());
     UpdateShader();
 }
 
 void MainWindow::on_sldScan_valueChanged(int value)
 {
+    m_settings->setValue("ui/sldscan",ui->sldScan->value());
     UpdateShader();
 }
 
 void MainWindow::on_sldChrom_valueChanged(int value)
 {
+    m_settings->setValue("ui/sldchrom",ui->sldChrom->value());
     UpdateShader();
 }
 
@@ -324,4 +382,52 @@ void MainWindow::on_action_Reset_system_triggered()
 void MainWindow::on_action_Quit_triggered()
 {
     QApplication::exit(0);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    //m_size = this->size().width()-10;
+    Fit();
+}
+
+void MainWindow::on_action1280_triggered()
+{
+    m_size = 1280;
+    Fit();
+}
+void MainWindow::on_action1024_triggered()
+{
+    m_size = 1024;
+    Fit();
+}
+void MainWindow::on_action768_triggered()
+{
+    m_size = 768;
+    Fit();
+}
+void MainWindow::on_action512_triggered()
+{
+    m_size = 512;
+    Fit();
+}
+
+void MainWindow::on_btnSetDir_clicked()
+{
+    QString path = QFileDialog::getExistingDirectory(this, tr("Choose directory with prg files"), ".", QFileDialog::ReadOnly);
+    if (path!="")
+        ui->leDIr->setText(path);
+}
+
+void MainWindow::on_action640x640_triggered()
+{
+    m_size = 640;
+    Fit();
+
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    DialogAbout* da = new DialogAbout();
+    da->exec();
+    delete da;
 }

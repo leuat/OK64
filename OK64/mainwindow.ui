@@ -20,25 +20,25 @@
       <item>
        <layout class="QHBoxLayout" name="hlMain" stretch="1,1">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="10,1">
           <item>
            <widget class="GLWidget" name="widget" native="true">
             <property name="minimumSize">
              <size>
-              <width>480</width>
-              <height>700</height>
+              <width>256</width>
+              <height>256</height>
              </size>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QTabWidget" name="tabWidget">
+           <widget class="QTabWidget" name="tabMain">
             <property name="currentIndex">
              <number>1</number>
             </property>
             <widget class="QWidget" name="tab">
              <attribute name="title">
-              <string>Main</string>
+              <string>State</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
@@ -60,7 +60,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_2">
                   <property name="text">
-                   <string>Toggle data</string>
+                   <string>Debugger</string>
                   </property>
                  </widget>
                 </item>
@@ -89,13 +89,20 @@
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QPushButton" name="btnSetDir">
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
             </widget>
             <widget class="QWidget" name="tab_2">
              <attribute name="title">
-              <string>Screen</string>
+              <string>Output</string>
              </attribute>
              <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,1,1,0">
               <item row="0" column="2">
@@ -228,7 +235,7 @@
      <x>0</x>
      <y>0</y>
      <width>700</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -239,7 +246,31 @@
     <addaction name="action_Reset_system"/>
     <addaction name="action_Quit"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <widget class="QMenu" name="menuSize">
+     <property name="title">
+      <string>Size</string>
+     </property>
+     <addaction name="action1280"/>
+     <addaction name="action1024"/>
+     <addaction name="action768"/>
+     <addaction name="action640x640"/>
+     <addaction name="action512"/>
+    </widget>
+    <addaction name="menuSize"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -257,12 +288,42 @@
   </action>
   <action name="action_Reset_system">
    <property name="text">
-    <string>&amp;Reset system</string>
+    <string>&amp;Reset system (C-r)</string>
    </property>
   </action>
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="action1280">
+   <property name="text">
+    <string>1280x1280</string>
+   </property>
+  </action>
+  <action name="action1024">
+   <property name="text">
+    <string>1024x1024</string>
+   </property>
+  </action>
+  <action name="action768">
+   <property name="text">
+    <string>768x768</string>
+   </property>
+  </action>
+  <action name="action512">
+   <property name="text">
+    <string>512x512</string>
+   </property>
+  </action>
+  <action name="action640x640">
+   <property name="text">
+    <string>640x640</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

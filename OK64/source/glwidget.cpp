@@ -73,6 +73,11 @@ void GLWidget::paintGL()
 
 }
 
+void GLWidget::Reset()
+{
+    time = 0;
+}
+
 void GLWidget::setTexture(QImage &img)
 {
     m_texture = new QOpenGLTexture( img );

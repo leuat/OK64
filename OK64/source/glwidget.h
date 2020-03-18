@@ -29,6 +29,7 @@ public:
     GLWidget(QWidget* );
     void initializeGL() override;
     void paintGL() override ;
+    void Reset();
 //    void paintEvent(QPaintEvent *event) override ;
     void setTexture(QImage& img);
     void resizeGL(int width, int height) override;
