@@ -13,6 +13,7 @@ jobs:
     timeout-minutes: 30
     if: "contains(github.event.head_commit.message, 'bump')"
     steps:
+      - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1
       - uses: jurplel/install-qt-action@v2
         with:
