@@ -2,8 +2,8 @@ name: win32-msvc
 
 on:
   push:
-    tags:
-      - 'bump'
+ #   tags:
+ #     - 'bump'
 
 jobs:
   build:
