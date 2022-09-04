@@ -31,6 +31,7 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           qmake INCLUDEPATH=$OK64dir/resid/include QMAKE_LFLAGS=-Wl,-L$OK64dir/resid/lib/ OK64.pro
           D:\a\TRSE\Qt\Tools\QtCreator\bin\jom.exe -j 2
+
           dir
 
       - name: Build zip
