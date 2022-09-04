@@ -13,8 +13,7 @@ jobs:
     timeout-minutes: 30
     if: "contains(github.event.head_commit.message, 'bump')"
     steps:
-      - name: Release new version of OK64
-
+    
       - uses: microsoft/setup-msbuild@v1
 
       - uses: jurplel/install-qt-action@v2
