@@ -24,11 +24,12 @@ jobs:
         shell: cmd
         run: |
           git clone https://github.com/leuat/OK64.git
-          dir
           cd OK64
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           qmake INCLUDEPATH=$OK64dir/resid/include QMAKE_LFLAGS=-Wl,-L$OK64dir/resid/lib/ OK64.pro
-          D:\a\TRSE\Qt\Tools\QtCreator\bin\jom.exe -j 2
+          dir D:\a\
+          D:\a\OK64\Qt\Tools\QtCreator\bin\jom.exe -j 2
+
           dir
 
       - name: Build zip
@@ -42,8 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag_name: Release
+          release_name: Automated Release
           body: |
             Automated Release by GitHub Action CI
           draft: false
