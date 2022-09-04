@@ -20,7 +20,6 @@ jobs:
           tools: 'tools_ifw,4.0.0,qt.tools.ifw.40 tools_qtcreator,8.0.1,qt.tools.qtcreator'
 
 
-
 #       OK64 doesn't build with Qt 6.0 or Qt 6.1 (no Qt Multimedia). Hopefully this will be fixed with Qt 6.2.
       - name: Build OK64
         shell: cmd
