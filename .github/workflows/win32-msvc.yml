@@ -22,7 +22,7 @@ jobs:
 
 
 
-       OK64 doesn't build with Qt 6.0 or Qt 6.1 (no Qt Multimedia). Hopefully this will be fixed with Qt 6.2.
+#       OK64 doesn't build with Qt 6.0 or Qt 6.1 (no Qt Multimedia). Hopefully this will be fixed with Qt 6.2.
       - name: Build OK64
         shell: cmd
         run: |
