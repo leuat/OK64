@@ -1,5 +1,10 @@
 name: win32-msvc
 
+on:
+  push:
+    tags:
+      - 'bump'
+
 jobs:
   build:
     runs-on: windows-2019
