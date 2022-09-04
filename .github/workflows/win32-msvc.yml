@@ -1,10 +1,10 @@
 
 name: win32-msvc
 
-on:
-  push:
-    tags:
-      - 'ok64 release'
+#on:
+#  push:
+#    tags:
+#      - 'ok64 release'
 
 
 jobs:
