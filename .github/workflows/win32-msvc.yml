@@ -36,15 +36,15 @@ jobs:
         run: |
           7z a ok64_win.zip ok64
 
-      - name: Publish zip
-        uses: ColinPitrat/update-release@master
+      - name: Upload Release Asset (x64)
+        id: upload-release-asset-x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release: OK64
-          message: OK64 windows build
-          body: OK64 <br/> The latest automated build of OK64 which succeeded. Download now!
-          files: ok64_wih.zip
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ok64_win.zip
+          asset_name: ok64_win.zip
+          asset_content_type: application/zip
 
 
