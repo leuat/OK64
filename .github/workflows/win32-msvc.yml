@@ -11,42 +11,41 @@ jobs:
   build:
     runs-on: windows-2019
     timeout-minutes: 30
-    if: "contains(github.event.head_commit.message, 'bump')"
-    steps:
-    - name: Release new version of OK64
+    if: "contains(github.event.head_commit.message, 'bump')"steps:
+      - name: Release new version of OK64
 
-    - uses: microsoft/setup-msbuild@v1
+      - uses: microsoft/setup-msbuild@v1
 
-    - uses: jurplel/install-qt-action@v2
-      with:
-        version: '6.0.1'
-        tools: 'tools_ifw,4.0.0,qt.tools.ifw.40 tools_qtcreator,8.0.1,qt.tools.qtcreator'
-
+      - uses: jurplel/install-qt-action@v2
+        with:
+          version: '6.0.1'
+          tools: 'tools_ifw,4.0.0,qt.tools.ifw.40 tools_qtcreator,8.0.1,qt.tools.qtcreator'
 
 
-#       OK64 doesn't build with Qt 6.0 or Qt 6.1 (no Qt Multimedia). Hopefully this will be fixed with Qt 6.2.
-    - name: Build OK64
-      shell: cmd
-      run: |
-        git clone https://github.com/leuat/OK64.git
-        cd OK64/OK64
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-        qmake INCLUDEPATH=$OK64dir/resid/include QMAKE_LFLAGS=-Wl,-L$OK64dir/resid/lib/ OK64.pro
-        D:\a\TRSE\Qt\Tools\QtCreator\bin\jom.exe -j 2
-        dir
 
-    - name: Build zip
-      shell: bash
-      run: |
-        7z a ok64_win.zip ok64
+       OK64 doesn't build with Qt 6.0 or Qt 6.1 (no Qt Multimedia). Hopefully this will be fixed with Qt 6.2.
+      - name: Build OK64
+        shell: cmd
+        run: |
+          git clone https://github.com/leuat/OK64.git
+          cd OK64/OK64
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+          qmake INCLUDEPATH=$OK64dir/resid/include QMAKE_LFLAGS=-Wl,-L$OK64dir/resid/lib/ OK64.pro
+          D:\a\TRSE\Qt\Tools\QtCreator\bin\jom.exe -j 2
+	  dir
 
-    - name: Publish zip
-      uses: ColinPitrat/update-release@master
-      with:
-        release: nightly
-        message: Nightly build
-        body: TRSE ${{ steps.version.outputs.TRSE_VERSION }} <br/> The latest automated nightly build of TRSE which succeeded. This is the recommended version to use.
-        files: Publish/publish_win/trse_win.zip
-        prerelease: false
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build zip
+        shell: bash
+        run: |
+          7z a ok64_win.zip ok64
+
+      - name: Publish zip
+        uses: ColinPitrat/update-release@master
+        with:
+          release: nightly
+          message: Nightly build
+          body: TRSE ${{ steps.version.outputs.TRSE_VERSION }} <br/> The latest automated nightly build of TRSE which succeeded. This is the recommended version to use.
+          files: Publish/publish_win/trse_win.zip
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
