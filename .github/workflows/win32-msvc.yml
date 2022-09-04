@@ -32,7 +32,12 @@ jobs:
           dir D:\a\OK64\Qt\Tools\QtCreator
           dir D:\a\OK64\Qt\Tools\QtCreator\bin
           D:\a\OK64\Qt\Tools\QtCreator\bin\jom\jom.exe -j 2 -f Makefile.Release
-          dir
+          dir 
+          cd release 
+          echo "WINDEPLOYQT running"
+          windeployqt .
+          dir 
+
 
       - name: Build zip
         shell: bash
