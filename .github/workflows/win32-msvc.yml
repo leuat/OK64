@@ -10,10 +10,10 @@ on:
 jobs:
   build:
     runs-on: windows-2019
-    timeout-minutes: 18
-    #if: "contains(github.event.head_commit.message, 'bump')"
+    timeout-minutes: 30
+    if: "contains(github.event.head_commit.message, 'bump')"
     steps:
-#      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1
       - uses: jurplel/install-qt-action@v2
         with:
@@ -31,7 +31,6 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           qmake INCLUDEPATH=$OK64dir/resid/include QMAKE_LFLAGS=-Wl,-L$OK64dir/resid/lib/ OK64.pro
           D:\a\TRSE\Qt\Tools\QtCreator\bin\jom.exe -j 2
-          dir
 
       - name: Build zip
         shell: bash
