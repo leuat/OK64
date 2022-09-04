@@ -31,8 +31,8 @@ jobs:
           dir D:\a\OK64\Qt\Tools
           dir D:\a\OK64\Qt\Tools\QtCreator
           dir D:\a\OK64\Qt\Tools\QtCreator\bin
-          D:\a\OK64\Qt\Tools\QtCreator\bin\jom.exe -j 2
-
+          D:\a\OK64\Qt\Tools\QtCreator\bin\jom\jom.exe -j 2 -f Makefile.Release
+          dir
 
       - name: Build zip
         shell: bash
