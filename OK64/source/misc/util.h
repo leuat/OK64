@@ -173,12 +173,6 @@ public:
         std::uniform_real_distribution<float> distribution(min, max);
         return distribution(generator);
     }
-    static wchar_t* QStringToWchar(QString t) {
-        wchar_t* arr = new wchar_t[t.size()+1];
-        t.toWCharArray(arr);
-        arr[t.size()]=0;
-        return arr;
-    }
 
     static void SaveByteArray(QByteArray& data, QString file);
 

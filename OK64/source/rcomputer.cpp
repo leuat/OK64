@@ -1,18 +1,19 @@
 #include "rcomputer.h"
 
+QByteArray RAudio::m_soundBuffer;
+int RAudio::m_currentPos = 0;
+qint64 RAudio::m_soundPos = 0;
+
 RComputer::RComputer()
 {
+
     m_audio.Init(m_khz,1.0/m_fps);
     m_sid.reset();
 #ifdef __linux__
 //   m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
 #endif
-//    m_sid.
     connect(this,SIGNAL(emitAudio()),this,SLOT(onAudio()));
-/*    bool set_sampling_parameters(double clock_freq, sampling_method method,
-                     double sample_freq, double pass_freq = -1,
-                     double filter_scale = 0.97);
-*/
+
 }
 
 
@@ -142,6 +143,8 @@ void RComputer::Execute()
 
 void RComputer::onAudio()
 {
+    if (m_audio.m_type==RAudio::TYPE_DISABLED)
+        return;
     if (m_abort)
         return;
 
@@ -154,18 +157,13 @@ void RComputer::onAudio()
 //    qDebug() << s;
     cycle_count csdelta = 1.0*((float)m_mhz / ((float)m_khz));
     int size = m_audio.m_size*m_bpp*(int)(m_audio.m_bufscale);
+//    qDebug() << size << m_audio.m_size;
+//    if (m_audio.m_type==RAudio::TYPE_QT)
+
     if (m_audio.m_reset==1) {
-        if (isFirst) {
-            m_audio.m_input->seek(0);
-
-            isFirst = false;
-        }
-        m_audio.m_soundPos = m_audio.m_input->pos()+m_bpp*m_audio.m_size*16;
-
         m_audio.m_reset = 0;
-    }
-    if (m_audio.m_reset==2) {
-        m_audio.m_reset = 0;
+        m_audio.m_currentPos = 0;
+        m_audio.m_soundPos = 0;
     }
 //    qDebug() << m_audio.m_input->pos() << " vs " << m_audio.m_soundPos;
 
@@ -184,6 +182,7 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+3] = *(ptr2 + 1);
     }
 
+//    qDebug() << "ADD  :" <<m_bpp*m_audio.m_size;
     m_audio.m_soundPos=(m_audio.m_soundPos + m_bpp*m_audio.m_size)%size;
     m_audioAction=false;
 
@@ -197,6 +196,9 @@ void RAudio::CopyBuffer()
 }
 
 void RAudio::Init(int samplerate, float dur) {
+    if (m_type==TYPE_DISABLED)
+        return;
+
     float sampleRate = samplerate;   // sample rate
     float duration = dur;     // duration in seconds
     int n  = int(duration * sampleRate);   // number of data samples
@@ -207,80 +209,40 @@ void RAudio::Init(int samplerate, float dur) {
     m_soundBuffer.fill(0);
     m_tempSoundBuffer.resize(n*4*m_bufscale);
     m_tempSoundBuffer.fill(0);
-    audioFormat.setSampleRate(static_cast<int>(sampleRate));
-    audioFormat.setChannelCount(2);
-    audioFormat.setSampleSize(16);   // set the sample size in bits. We set it to 32 bis, because we set SampleType to float (one float has 4 bytes ==> 32 bits)
-    audioFormat.setCodec("audio/pcm");
-    audioFormat.setByteOrder(QAudioFormat::LittleEndian);
-//    audioFormat.setSampleType(QAudioFormat::Float);   // use Float, to have a better resolution than SignedInt or UnSignedInt
-    audioFormat.setSampleType(QAudioFormat::SignedInt);   // use Float, to have a better resolution than SignedInt or UnSignedInt
-    QAudioDeviceInfo deviceInfo(QAudioDeviceInfo::defaultOutputDevice());
-    if(!deviceInfo.isFormatSupported(audioFormat))
-    {
-        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
-        return;
+
+
+    /* Set the audio format */
+    wanted.freq = sampleRate;
+    wanted.format = AUDIO_S16;
+    wanted.channels = 2;    /* 1 = mono, 2 = stereo */
+    wanted.samples = 1024;  /* Good low-latency value for callback */
+    wanted.callback = fill_audio_sdl;
+    wanted.userdata = NULL;
+
+    /* Open the audio device, forcing the desired format */
+    if ( SDL_OpenAudio(&wanted, NULL) < 0 ) {
+        qDebug() << "Couldn't open audio: ";
+        qDebug() << SDL_GetError();
+        m_type = TYPE_DISABLED;
     }
-    if (audio==nullptr)
-        audio = new QAudioOutput(audioFormat, this);
-//    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-//      m_input = new QInfiniteBuffer(&m_tempSoundBuffer,nullptr);
-//      m_input = new QInfiniteBuffer(&m_soundBuffer,nullptr);
-      m_input = new QBuffer(&m_soundBuffer,nullptr);
-      m_input->open(QIODevice::ReadOnly);   // set the QIODevice to read-only
-
-/*      m_aThread.audio = audio;
-      m_aThread.buf = m_input;
-      m_aThread.start();
-      m_aThread.run();*/
-
-      audio->reset();
-      audio->start(m_input);
-      connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+    SDL_PauseAudio(0);
 }
 
-
-void RAudio::handleStateChanged(QAudio::State newState)
+void RAudio::fill_audio_sdl(void *udata, Uint8 *stream, int len)
 {
-    if (newState==QAudio::StoppedState) {
-//        qDebug() << "STOPPED";
-    }
 
-    if (newState==QAudio::IdleState && !done) {
-//            qDebug()<< "IDLE";
- //         audio->reset();
-//            audio->setNotifyInterval(10000);
-//            audio->
-          m_input->seek(0);
-          audio->start(m_input);
-          m_reset = 2;
-    }
-    if (done) {
-  //      qDebug() << "DONE";
-        audio->stop();
+    int size = m_soundBuffer.count();
+    int p = (m_currentPos)%size;
+    SDL_MixAudio(stream, (unsigned char*)&m_soundBuffer[p], len, SDL_MIX_MAXVOLUME);
+    m_currentPos+=len;
+//    qDebug() << p << size << len;
 
-        delete m_input;
-        m_input = nullptr;
-    }
 }
 
-qint64 QInfiniteBuffer::readData(char *output, qint64 maxlen)
+RAudio::~RAudio()
 {
-    qint64 outputpos=0;
-       const QByteArray &d=data();
-
-       do
-       {
-           qint64 sizetocopy=maxlen-outputpos;
-           if((maxlen-outputpos)>(d.size()-m_pos))
-               sizetocopy=d.size()-m_pos;
-
-           memcpy(output,d.constData()+m_pos,sizetocopy);
-           outputpos+=sizetocopy;
-           m_pos=(m_pos+sizetocopy)%d.size();
- //          if(m_pos>=d.size())
-   //            m_pos=0;
-       } while(outputpos<maxlen);
-
-       return maxlen;
+    if (m_type==TYPE_SDL)
+        SDL_CloseAudio();
 }
+
 

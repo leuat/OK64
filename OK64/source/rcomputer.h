@@ -16,65 +16,28 @@
 #ifdef _WIN32
 #include "resid_win/sid.h"
 #endif
-#include <QAudio>
-#include <QAudioBuffer>
-#include <QAudioFormat>
+#include <SDL/SDL_audio.h>
 #include <QBuffer>
-#include <QAudioDeviceInfo>
-#include <QAudioOutput>
-
-class QInfiniteBuffer : public QBuffer {
-public:
-    qint64 getPos() {
-        return m_pos;
-    }
-private:
-    qint64 m_pos;
-
-
-public:
-    QInfiniteBuffer(QByteArray *buf, QObject *parent) :
-        QBuffer(buf,parent)
-    {
-        m_pos=0;
-    }
-
-    QInfiniteBuffer(QObject *parent) :
-        QBuffer(parent)
-    {
-        m_pos=0;
-    }
-
-    qint64 readData(char *output, qint64 maxlen) override;
-};
-
-
-class AThread : public QThread {
-
-   public:
-    QAudioOutput* audio;
-    QBuffer* buf;
-    void run() override {
-        audio->start(buf);
-    };
-
-};
 
 
 class RAudio : public QObject {
     Q_OBJECT
 public:
     bool done = false;
-    QAudioFormat audioFormat;
-    QByteArray m_soundBuffer;
+    static QByteArray m_soundBuffer;
     QByteArray m_tempSoundBuffer;
-    QAudioOutput* audio = nullptr;
-    AThread m_aThread;
+    static int m_currentPos;
+    static const int TYPE_DISABLED = 0;
+    static const int TYPE_QT = 1;
+    static const int TYPE_SDL = 2;
+    int m_type = TYPE_SDL;
     int m_reset = 1;
     int m_size = 0;
-    qint64 m_soundPos=0;
+    SDL_AudioSpec wanted;
+    static qint64 m_soundPos;
+
 //    float m_bufscale = 51200;
-    float m_bufscale = 15120;
+    float m_bufscale = 1024;
 //    float m_bufscale = 16;
  //   float m_bufscale = 16;
 //    int m_cur = 0;
@@ -83,9 +46,9 @@ public:
     QBuffer* m_input = nullptr;
     void CopyBuffer();
     void Init(int samplerate, float dur);
+    static void fill_audio_sdl(void *udata, Uint8 *stream, int len);
+    ~RAudio();
 
-public slots:
-    void handleStateChanged(QAudio::State newState);
 };
 
 

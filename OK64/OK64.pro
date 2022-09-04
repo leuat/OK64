@@ -4,9 +4,16 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia opengl
+QT       += core gui opengl
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+VER = $$QT_MAJOR_VERSION
+equals(VER, 6) {
+    QT += openglwidgets
+
+}
 
 TARGET = OK64
 TEMPLATE = app
@@ -75,7 +82,7 @@ linux*{
 }
 
 macx*{
-    LIBS +=  -L/usr/local/lib/ -lresid -openmp
+    LIBS +=  -L/usr/local/lib/ -lresid -lsdl
     QMAKE_CXXFLAGS += -openmp -O2
     INCLUDEPATH+=/usr/local/include
 

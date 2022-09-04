@@ -19,7 +19,6 @@ void GLWidget::initializeGL()
  //   initializeGL()
     QImage image(256,256,QImage::Format_RGB32);
     m_texture = new QOpenGLTexture( image );
-
     m_program = new QOpenGLShaderProgram;
  //   qDebug() <<Util::read_textfile(":/resources/shaders/screen.vert");
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, Util::loadTextFile(":/resources/shaders/screen.vert"));
@@ -80,11 +79,13 @@ void GLWidget::Reset()
 
 void GLWidget::setTexture(QImage &img)
 {
+    if (m_texture!=nullptr)
+        delete m_texture;
     m_texture = new QOpenGLTexture( img );
     update();
   //  update();
 }
-
+/*
 void GLWidget::resizeGL(int width, int height)
 {
     int side = qMin(width, height);
@@ -99,3 +100,4 @@ void GLWidget::resizeGL(int width, int height)
 #endif
     glMatrixMode(GL_MODELVIEW);
 }
+*/

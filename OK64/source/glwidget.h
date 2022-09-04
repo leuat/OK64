@@ -32,7 +32,7 @@ public:
     void Reset();
 //    void paintEvent(QPaintEvent *event) override ;
     void setTexture(QImage& img);
-    void resizeGL(int width, int height) override;
+//    void resizeGL(int width, int height) override;
 };
 
 #endif // GLWIDGET_H
