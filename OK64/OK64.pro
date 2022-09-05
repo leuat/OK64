@@ -68,7 +68,11 @@ win32-msvc*{
     LIBS += -openmp
     QMAKE_CXXFLAGS += -O3
     LIBS += -L$$PWD/libs/ -lresid
-    LIBS   += -lopengl32 -lopengl
+    LIBS   += -lopengl32
+    LIBS += -LC:\Users\leuat\Documents\SDL2-2.24.0\lib\x64 -lsdl2
+
+    INCLUDEPATH+=C:\Users\leuat\Documents\SDL2-2.24.0\include
+
     #LIBS   += -lglu32
     #LIBS   += -lglut32
 #   QMAKE $$PWD\..\..\TRSE\Publish\tutorials\OK64\KOS\kos.prg $$PWD/resources/rom/

@@ -59,17 +59,12 @@
 #endif
 
 
-using namespace std;
 
 class Util {
 
 public:
 
     static QElapsedTimer globalTimer;
-
-    static void Tokenize(const string& str,
-                         vector<string>& tokens,
-                         const string& delimiters = " ");
 
 
 
@@ -84,15 +79,14 @@ public:
       return ((dword>>24)&0x000000FF) | ((dword>>8)&0x0000FF00) | ((dword<<8)&0x00FF0000) | ((dword<<24)&0xFF000000);
    }
 
-    static void string2char(string s, char* to);
-    static string toString(double d, string param);
-    static string toString(double d);
-    static string toString(int d);
+    static void string2char(std::string s, char* to);
+    static std::string toString(double d, std::string param);
+    static std::string toString(double d);
+    static std::string toString(int d);
     static bool CancelSignal;
-    static const char* read_textfile(string filename);
-    static void verify_file(string filename);
-    static bool verify_file_bool(string filename);
-    static string trim(string s);
+    static const char* read_textfile(std::string filename);
+    static void verify_file(std::string filename);
+    static bool verify_file_bool(std::string filename);
     static int VerifyHexAddress(QString s);
     static QString numToHex(int v);
     static QString path;
@@ -197,7 +191,7 @@ public:
     }
 
     static QVector3D floor(const QVector3D v) {
-        return QVector3D( max(0.0f, v.x()), max(0.0f,v.y()), max(0.0f,v.z())  );
+        return QVector3D( std::max(0.0f, v.x()), std::max(0.0f,v.y()), std::max(0.0f,v.z())  );
     }
 
     static QVector3D Rotate2D(QVector3D point, QVector3D center, float angle) {
@@ -287,8 +281,8 @@ public:
     static void drawBox(QImage* backImage, QImage* img, int i, int j, int size, QRgb color) {
         int imageSize = img->width();
         QRgb mark = QColor(1,1,1).rgba();
-        for (int x=max(0, i-size/2);x<=min(imageSize-1, i+size/2);x++)
-            for (int y=max(0, j-size/2);y<=min(imageSize-1, j+size/2);y++) {
+        for (int x=std::max(0, i-size/2);x<=std::min(imageSize-1, i+size/2);x++)
+            for (int y=std::max(0, j-size/2);y<=std::min(imageSize-1, j+size/2);y++) {
                 QColor col = QColor::fromRgba(backImage->pixel(x,y));
                 if (col.red()==0) {
                     img->setPixel(x,y,color);
@@ -356,7 +350,7 @@ public:
         return str;
     }
     static QVector3D maxQvector3D(const QVector3D a, const QVector3D b) {
-        return QVector3D(max(a.x(), b.x()),max(a.y(), b.y()),max(a.z(), b.z()));
+        return QVector3D(std::max(a.x(), b.x()),std::max(a.y(), b.y()),std::max(a.z(), b.z()));
     }
 
     inline static bool Mollweide(QVector3D& out, float i, float j, float l0, float R, float size) {

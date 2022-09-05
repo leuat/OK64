@@ -26,7 +26,7 @@ public:
     int m_count=0;
     int m_size = 900;
     int m_prevPC;
-    QString m_version = "1.01";
+    QString m_version = "1.02";
     float m_workLoad;
     void DisplayProgram();
     void UpdateStatus();
@@ -44,6 +44,7 @@ private:
 public slots:
     void onEmitOutput();
 private slots:
+    void on_load_file(QString filename);
     void on_btnNext_clicked();
     void on_btnRun_clicked();
     void on_pushButton_clicked();

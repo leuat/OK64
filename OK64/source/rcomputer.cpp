@@ -7,7 +7,7 @@ qint64 RAudio::m_soundPos = 0;
 RComputer::RComputer()
 {
 
-    m_audio.Init(m_khz,1.0/m_fps);
+    m_audio.Init(m_khz,1.00/m_fps);
     m_sid.reset();
 #ifdef __linux__
 //   m_sid.set_sampling_parameters(m_mhz,SAMPLE_FAST,m_khz);
@@ -43,7 +43,6 @@ void RComputer::Step()
 void RComputer::Run()
 {
     m_run = true;
-    m_audio.m_input->seek(0);
 }
 
 
@@ -64,6 +63,7 @@ void RComputer::Reset()
     m_okvc.Init(&m_pram, &m_vram, m_cpu.m_impl);
 //    m_audio.Init(m_khz,1.0/m_fps);
     m_audio.m_reset = 1;
+    m_audio.m_soundBuffer.fill(0);
     m_run = true;
 
 }
@@ -150,50 +150,37 @@ void RComputer::onAudio()
 
     m_audioAction=true;
 
-//    return;
     for (int i=0;i<0x20;i++)
         m_sid.write(i,m_pram.get(m_okvc.p_sid+i));
 
-//    qDebug() << s;
     cycle_count csdelta = 1.0*((float)m_mhz / ((float)m_khz));
-    int size = m_audio.m_size*m_bpp*(int)(m_audio.m_bufscale);
-//    qDebug() << size << m_audio.m_size;
-//    if (m_audio.m_type==RAudio::TYPE_QT)
+    int size = m_audio.m_soundBuffer.size();
 
     if (m_audio.m_reset==1) {
         m_audio.m_reset = 0;
         m_audio.m_currentPos = 0;
         m_audio.m_soundPos = 0;
     }
-//    qDebug() << m_audio.m_input->pos() << " vs " << m_audio.m_soundPos;
 
     for (int i=0;i<m_audio.m_size;i++) {
 
         m_sid.clock(csdelta);
         int c1 = m_sid.output()*m_pram.get(m_okvc.p_channel1Vol)/255.0;
         int c2 = m_sid.output()*m_pram.get(m_okvc.p_channel2Vol)/255.0;
+
         char *ptr1 = (char*)(&c1);
         char *ptr2 = (char*)(&c2);
-//        int j = (size+ i*m_bpp + m_audio.m_soundPos-m_bpp*44100)%(size);// + m_audio.m_cur*4*s;
-        int j = (size+ i*m_bpp + m_audio.m_soundPos)%(size);// + m_audio.m_cur*4*s;
+        int j = (size+ i*m_bpp + m_audio.m_soundPos)%(size);
         m_audio.m_soundBuffer[j+0] = *ptr1;
-        m_audio.m_soundBuffer[j+1] = *(ptr1 + 1);
-        m_audio.m_soundBuffer[j+2] = *ptr2;
-        m_audio.m_soundBuffer[j+3] = *(ptr2 + 1);
+        m_audio.m_soundBuffer[(j+1)%size] = *(ptr1 + 1);
+        m_audio.m_soundBuffer[(j+2)%size] = *ptr2;
+        m_audio.m_soundBuffer[(j+3)%size] = *(ptr2 + 1);
     }
-
-//    qDebug() << "ADD  :" <<m_bpp*m_audio.m_size;
     m_audio.m_soundPos=(m_audio.m_soundPos + m_bpp*m_audio.m_size)%size;
     m_audioAction=false;
 
 }
 
-void RAudio::CopyBuffer()
-{
-    for (int i=0;i<m_tempSoundBuffer.count();i++)
-          m_tempSoundBuffer[i]=m_soundBuffer[i];
-
-}
 
 void RAudio::Init(int samplerate, float dur) {
     if (m_type==TYPE_DISABLED)
@@ -207,17 +194,16 @@ void RAudio::Init(int samplerate, float dur) {
     m_soundPos = 0;
     m_soundBuffer.resize(n*4*m_bufscale);
     m_soundBuffer.fill(0);
-    m_tempSoundBuffer.resize(n*4*m_bufscale);
-    m_tempSoundBuffer.fill(0);
 
 
     /* Set the audio format */
     wanted.freq = sampleRate;
     wanted.format = AUDIO_S16;
     wanted.channels = 2;    /* 1 = mono, 2 = stereo */
-    wanted.samples = 1024;  /* Good low-latency value for callback */
+    wanted.samples = 1024*4;  /* Good low-latency value for callback */
     wanted.callback = fill_audio_sdl;
     wanted.userdata = NULL;
+
 
     /* Open the audio device, forcing the desired format */
     if ( SDL_OpenAudio(&wanted, NULL) < 0 ) {
@@ -231,11 +217,11 @@ void RAudio::Init(int samplerate, float dur) {
 void RAudio::fill_audio_sdl(void *udata, Uint8 *stream, int len)
 {
 
-    int size = m_soundBuffer.count();
-    int p = (m_currentPos)%size;
+    int size = m_soundBuffer.size();
+    int p = (m_currentPos+size)%size;
+    SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, (unsigned char*)&m_soundBuffer[p], len, SDL_MIX_MAXVOLUME);
     m_currentPos+=len;
-//    qDebug() << p << size << len;
 
 }
 

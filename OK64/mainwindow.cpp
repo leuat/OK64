@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //SetDarkPalette();
     connect(&m_computer,SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(OnQuit()));
+    connect(ui->widget,SIGNAL(emitOpenFile(QString)),this,SLOT(on_load_file(QString)));
 
 
     m_computer.PowerOn();
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QCoreApplication::setOrganizationName("LemonSpawn");
     QCoreApplication::setApplicationName("OK64");
     m_settings = new QSettings();
+//    std::cout << m_settings->fileName().toStdString()<<std::endl;
     DefaultUIValues();
 
 
@@ -195,11 +197,11 @@ void MainWindow::Fit()
 void MainWindow::DefaultUIValues()
 {
     //qDebug() << "POES " <<m_settings->value("ui/sldcrt",40).toInt();
-    ui->sldCrt->setValue(m_settings->value("ui/sldcrt",40).toInt());
+    ui->sldCrt->setValue(m_settings->value("ui/sldcrt",14).toInt());
     ui->sldSat->setValue(m_settings->value("ui/sldsat",50).toInt());
-    ui->sldGamma->setValue(m_settings->value("ui/sldgam",45).toInt());
-    ui->sldScan->setValue(m_settings->value("ui/sldscan",30).toInt());
-    ui->sldChrom->setValue(m_settings->value("ui/sldchrom",25).toInt());
+    ui->sldGamma->setValue(m_settings->value("ui/sldgam",40).toInt());
+    ui->sldScan->setValue(m_settings->value("ui/sldscan",10).toInt());
+    ui->sldChrom->setValue(m_settings->value("ui/sldchrom",20).toInt());
 
     ui->tabMain->setCurrentIndex(m_settings->value("ui/curtab",1).toInt());
     ui->leDIr->setText(m_settings->value("ui/curdir","").toString());
@@ -218,16 +220,8 @@ void MainWindow::Reset(bool first)
     // Hard cap in reset
     if (ui->widget->time<50 && ui->widget->time!=0.0)
         return;
-    m_computer.m_run =false;
-    m_computer.msleep(25);
-    QThread::msleep(25);
 
-
-    m_computer.LoadProgram(":resources/rom/kos.prg");
-    m_computer.Reset();
-    ui->widget->Reset();
-//    ui->widget->time = 0;
-    m_computer.m_run =true;
+    on_load_file(":resources/rom/kos.prg");
 }
 
 void MainWindow::ResetFocus()
@@ -261,6 +255,21 @@ void MainWindow::onEmitOutput()
     }
     m_count++;
     m_computer.m_outputBusy=false;
+
+}
+
+void MainWindow::on_load_file(QString filename)
+{
+
+    m_computer.m_run =false;
+    m_computer.msleep(25);
+    QThread::msleep(25);
+
+
+    m_computer.LoadProgram(filename);
+    m_computer.Reset();
+    ui->widget->Reset();
+    m_computer.m_run =true;
 
 }
 

@@ -5,9 +5,13 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
+#include <QMimeData>
+#include <QDropEvent>
+#include <QString>
 
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
+Q_OBJECT
 
     QOpenGLShaderProgram * m_program = nullptr;
     QOpenGLTexture       * m_texture = nullptr;
@@ -32,6 +36,18 @@ public:
     void Reset();
 //    void paintEvent(QPaintEvent *event) override ;
     void setTexture(QImage& img);
+    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent *e) override
+    {
+//        e->acceptProposedAction();
+        if (e->mimeData()->hasUrls()) {
+            e->acceptProposedAction();
+        }
+    }
+
+public slots:
+signals:
+    void emitOpenFile(QString);
 //    void resizeGL(int width, int height) override;
 };
 

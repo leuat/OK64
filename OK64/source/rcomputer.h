@@ -15,8 +15,11 @@
 #endif
 #ifdef _WIN32
 #include "resid_win/sid.h"
+#include <SDL_audio.h>
 #endif
+#ifdef __APPLE__
 #include <SDL/SDL_audio.h>
+#endif
 #include <QBuffer>
 
 
@@ -25,7 +28,6 @@ class RAudio : public QObject {
 public:
     bool done = false;
     static QByteArray m_soundBuffer;
-    QByteArray m_tempSoundBuffer;
     static int m_currentPos;
     static const int TYPE_DISABLED = 0;
     static const int TYPE_QT = 1;
@@ -33,18 +35,11 @@ public:
     int m_type = TYPE_SDL;
     int m_reset = 1;
     int m_size = 0;
+    int m_time = 0;
     SDL_AudioSpec wanted;
     static qint64 m_soundPos;
 
-//    float m_bufscale = 51200;
     float m_bufscale = 1024;
-//    float m_bufscale = 16;
- //   float m_bufscale = 16;
-//    int m_cur = 0;
-   // QInfiniteBuffer* m_input;
-//    QInfiniteBuffer* m_input = nullptr;
-    QBuffer* m_input = nullptr;
-    void CopyBuffer();
     void Init(int samplerate, float dur);
     static void fill_audio_sdl(void *udata, Uint8 *stream, int len);
     ~RAudio();
