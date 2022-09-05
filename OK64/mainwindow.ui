@@ -263,6 +263,7 @@ p, li { white-space: pre-wrap; }
      <addaction name="action512"/>
     </widget>
     <addaction name="menuSize"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
