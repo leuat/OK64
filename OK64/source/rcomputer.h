@@ -33,6 +33,7 @@ public:
     int m_type = TYPE_SDL;
     int m_reset = 1;
     int m_size = 0;
+    int m_time = 0;
     SDL_AudioSpec wanted;
     static qint64 m_soundPos;
 

@@ -172,6 +172,9 @@ void RComputer::onAudio()
         m_sid.clock(csdelta);
         int c1 = m_sid.output()*m_pram.get(m_okvc.p_channel1Vol)/255.0;
         int c2 = m_sid.output()*m_pram.get(m_okvc.p_channel2Vol)/255.0;
+
+        c1 = sin((m_time+i)*0.001)*10000.5;
+        c2 = sin((m_time+i)*0.0025+100)*10000.5;
         char *ptr1 = (char*)(&c1);
         char *ptr2 = (char*)(&c2);
 //        int j = (size+ i*m_bpp + m_audio.m_soundPos-m_bpp*44100)%(size);// + m_audio.m_cur*4*s;
@@ -181,7 +184,7 @@ void RComputer::onAudio()
         m_audio.m_soundBuffer[j+2] = *ptr2;
         m_audio.m_soundBuffer[j+3] = *(ptr2 + 1);
     }
-
+    m_time+=1;
 //    qDebug() << "ADD  :" <<m_bpp*m_audio.m_size;
     m_audio.m_soundPos=(m_audio.m_soundPos + m_bpp*m_audio.m_size)%size;
     m_audioAction=false;
@@ -215,7 +218,7 @@ void RAudio::Init(int samplerate, float dur) {
     wanted.freq = sampleRate;
     wanted.format = AUDIO_S16;
     wanted.channels = 2;    /* 1 = mono, 2 = stereo */
-    wanted.samples = 1024;  /* Good low-latency value for callback */
+    wanted.samples = 1024*4;  /* Good low-latency value for callback */
     wanted.callback = fill_audio_sdl;
     wanted.userdata = NULL;
 
