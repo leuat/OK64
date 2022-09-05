@@ -59,6 +59,7 @@ void OKVC::ResetFileList()
         m_listFiles.append("No prg files found.");
 
     }
+    qDebug() << m_listFiles;
     InsertString(m_listFiles[m_currentFile],p_fileLocation);
 }
 
@@ -120,6 +121,9 @@ void OKVC::LoadRom(QString fn, int startpos, bool useHeader)
     QFile file(fn);
     if (!file.open(QIODevice::ReadOnly)) return;
     QByteArray blob = file.readAll();
+    if (blob.size()<2)
+        return;
+
     int pos = startpos;
     if (useHeader) {
         pos = blob[1]*0x100 + blob[0];

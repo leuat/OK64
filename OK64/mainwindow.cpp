@@ -154,12 +154,13 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
         }
     }
 
-
-    if (e->text().count()==0)
+    QVector<int> arrowKeys({18,19,20,21});
+    if (e->text().count()==0 && !arrowKeys.contains((char)e->key()))
         return;
     char c = e->key();
     if (e->text().count()>0)
         c = e->text().at(0).toLatin1();
+//    qDebug() << c;
     m_computer.setKey(c);
 }
 

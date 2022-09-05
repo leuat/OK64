@@ -10,5 +10,7 @@
         <file>resources/rom/lines.prg</file>
         <file>resources/rom/fonts.prg</file>
         <file>resources/rom/cyc.prg</file>
+        <file>resources/img/power.png</file>
+        <file>resources/img/play.png</file>
     </qresource>
 </RCC>

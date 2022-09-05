@@ -70,6 +70,8 @@ void RComputer::Reset()
 
 int RComputer::LoadProgram(QString fn)
 {
+    if (!QFile::exists(fn))
+        return 0;
     Reset();
     m_okvc.LoadRom(fn,0,true);
     m_cpu.m_impl->pc = 0x400;
