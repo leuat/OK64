@@ -218,7 +218,7 @@ void RAudio::fill_audio_sdl(void *udata, Uint8 *stream, int len)
 {
 
     int size = m_soundBuffer.size();
-    int p = (m_currentPos+size)%size;
+    int p = (m_currentPos+size-4096*4)%size;
     SDL_memset(stream, 0, len);
     SDL_MixAudio(stream, (unsigned char*)&m_soundBuffer[p], len, SDL_MIX_MAXVOLUME);
     m_currentPos+=len;
