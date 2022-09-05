@@ -59,7 +59,7 @@ void OKVC::ResetFileList()
         m_listFiles.append("No prg files found.");
 
     }
-    qDebug() << m_listFiles;
+//    qDebug() << m_listFiles;
     InsertString(m_listFiles[m_currentFile],p_fileLocation);
 }
 
