@@ -37,16 +37,19 @@ void OKVC::ResetFileList()
 {
     m_listFiles.clear();
     m_currentFile = 0;
+    QString dir = m_currentDir;
+    if (dir=="")
+        dir = ":resources/rom/";
     InsertString("               ",p_fileLocation);
-    if (!m_currentDir.endsWith(QDir::separator()))
-        m_currentDir +=QDir::separator();
-    QDir d(m_currentDir);
+    if (!dir.endsWith(QDir::separator()))
+        dir +=QDir::separator();
+    QDir d(dir);
 
     if (!d.exists()) {
         InsertString("Invalid file directory",p_fileLocation);
         return;
     }
-    QDirIterator it(m_currentDir, QStringList() << "*.prg", QDir::Files);
+    QDirIterator it(dir, QStringList() << "*.prg", QDir::Files);
     while (it.hasNext()) {
         QString s = it.next();
         m_listFiles.append(s.split("/").last());
@@ -71,15 +74,19 @@ void OKVC::LoadFile()
 {
     QString f = "";
     int pos = p_fileLocation;
-    if (!m_currentDir.endsWith(QDir::separator()))
-        m_currentDir +=QDir::separator();
+    QString dir = m_currentDir;
+    if (dir=="")
+        dir = ":resources/rom/";
+
+    if (!dir.endsWith(QDir::separator()))
+        dir +=QDir::separator();
     while (state.m_pram->get(pos)!=0){
         f+=QChar(state.m_pram->get(pos));
         pos++;
     }
-    if (!QFile::exists(m_currentDir + f))
+    if (!QFile::exists(dir + f))
         return;
-    LoadRom(m_currentDir + f,0,true);
+    LoadRom(dir + f,0,true);
 //    state.m_impl->Run(0x400);
     state.m_impl->pc = 0x400;
     Defaults();
