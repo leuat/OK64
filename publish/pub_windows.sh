@@ -22,6 +22,8 @@ ls
 
 cp C:/Users/leuat/Documents/SDL2-2.24.0/lib/x64/SDL2.dll .
 cd ..
+rm -rf OK64
+
 mv work OK64
 rm ok64_win64.zip
 "c:\Program Files\7-Zip\7z.exe" a ok64_win64.zip OK64
