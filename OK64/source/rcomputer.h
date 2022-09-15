@@ -20,6 +20,11 @@
 #ifdef __APPLE__
 #include <SDL/SDL_audio.h>
 #endif
+#ifdef Q_OS_UNIX
+#include <SDL2/SDL_audio.h>
+#include <resid/sid.h>
+
+#endif
 #include <QBuffer>
 
 

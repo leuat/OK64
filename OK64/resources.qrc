@@ -12,5 +12,6 @@
         <file>resources/rom/cyc.prg</file>
         <file>resources/img/power.png</file>
         <file>resources/img/play.png</file>
+        <file>resources/shaders/screen_clean.frag</file>
     </qresource>
 </RCC>

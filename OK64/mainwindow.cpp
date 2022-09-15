@@ -441,3 +441,10 @@ void MainWindow::on_actionAbout_triggered()
     da->exec();
     delete da;
 }
+
+void MainWindow::on_action256x256_triggered()
+{
+    m_size = 256;
+    Fit();
+
+}

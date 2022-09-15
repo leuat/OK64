@@ -25,6 +25,7 @@ void GLWidget::initializeGL()
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, Util::loadTextFile(":/resources/shaders/screen.vert"));
 
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, Util::loadTextFile(":/resources/shaders/screen.frag"));
+//    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, Util::loadTextFile(":/resources/shaders/screen_clean.frag"));
     m_program->bindAttributeLocation("vPosition", 0);
     m_program->link();
 

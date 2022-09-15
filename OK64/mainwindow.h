@@ -69,6 +69,7 @@ private slots:
     void on_btnSetDir_clicked();
     void on_action640x640_triggered();
     void on_actionAbout_triggered();
+    void on_action256x256_triggered();
 };
 
 #endif // MAINWINDOW_H
