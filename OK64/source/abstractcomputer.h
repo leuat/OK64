@@ -1,5 +1,5 @@
-#ifndef RCOMPUTER_H
-#define RCOMPUTER_H
+#ifndef ABSTRACTCOMPUTER_H
+#define ABSTRACTCOMPUTER_H
 
 #include <QPixmap>
 #include <QThread>
@@ -18,7 +18,7 @@
 #include <SDL_audio.h>
 #endif
 #ifdef __APPLE__
-#include <SDL/SDL_audio.h>
+#include <SDL2/SDL_audio.h>
 #endif
 #ifdef Q_OS_UNIX
 #include <SDL2/SDL_audio.h>
@@ -52,20 +52,20 @@ public:
 };
 
 
-class RComputer : public QThread
+class AbstractComputer : public QThread
 {
     Q_OBJECT
 public:
-    RComputer();
+    AbstractComputer();
     QPixmap m_outPut;
     bool isFirst = true;
     bool m_abort = false;
     bool m_run = false;
     int m_mhz = 985000; // mhz
     int m_fps = 50; // hz
-//    int m_khz = 44100;
+    //    int m_khz = 44100;
     int m_khz = 44100;
-    int m_cyclesPerFrame = m_mhz/m_fps;
+    const int m_cyclesPerFrame = m_mhz/m_fps;
     int m_time = 0;
     int m_bpp = 4;
     int m_currentKey = 0;
@@ -108,4 +108,5 @@ signals:
     void emitAudio();
 };
 
-#endif // RCOMPUTER_H
+
+#endif // ABSTRACTCOMPUTER_H

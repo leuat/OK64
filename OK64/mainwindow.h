@@ -3,12 +3,12 @@
 
 #include <QMainWindow>
 #include <QKeyEvent>
-#include "source/rcomputer.h"
+#include "source/okcomputer.h"
 #include "source/misc/util.h"
 #include <QFileDialog>
 #include <QSettings>
 #include "source/dialogabout.h"
-
+#include <QSharedPointer>
 
 namespace Ui {
 class MainWindow;
@@ -19,9 +19,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(int type, QWidget *parent = nullptr);
     ~MainWindow();
-    RComputer m_computer;
+    QSharedPointer<AbstractComputer> m_computer;
     QStringList m_commands;
     int m_count=0;
     int m_size = 900;

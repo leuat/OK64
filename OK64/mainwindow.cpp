@@ -1,19 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include "source/okcomputer.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow( int type,QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    if (type==0)
+        m_computer = QSharedPointer<AbstractComputer>(new OkComputer());
+
     ui->setupUi(this);
     //SetDarkPalette();
-    connect(&m_computer,SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
+    connect(m_computer.get(),SIGNAL(emitOutput()),this,SLOT(onEmitOutput()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(OnQuit()));
     connect(ui->widget,SIGNAL(emitOpenFile(QString)),this,SLOT(on_load_file(QString)));
 
 
-    m_computer.PowerOn();
+    m_computer->PowerOn();
 
     this->setWindowTitle("OK64 version "+m_version);
     QCoreApplication::setApplicationVersion(m_version);
@@ -31,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Fit();
     //uielement->setFocusPolicy(Qt::NoFocus);
     //ui->lblOutput->setFocusPolicy(Qt::StrongFocus);
-    m_computer.m_okvc.m_currentDir = ui->leDIr->text();
+    m_computer->m_okvc.m_currentDir = ui->leDIr->text();
 
 
     QString StyleSheet = Util::loadTextFile(":resources/QTDark.stylesheet");
@@ -61,16 +65,16 @@ void MainWindow::DisplayProgram()
 {
     bool done = false;
     QString output = "<p>";
-    ushort pc = ((m_computer.m_cpu.r.pc/16)-8)*16;
+    ushort pc = ((m_computer->m_cpu.r.pc/16)-8)*16;
 
     int cnt = 0;
     int column = 0;
     while (!done) {
-        uchar c = m_computer.m_pram.get(pc);
+        uchar c = m_computer->m_pram.get(pc);
         QString b = Util::numToHex(c).remove("$");
         if (b.length()==1) b="0"+b;
         b="&nbsp;"+b;
-        if (pc==m_computer.m_cpu.r.pc)
+        if (pc==m_computer->m_cpu.r.pc)
             b = "<b><font color=\"#8080FF\">"+b+"</font></b>";
 
         if (column==0) {
@@ -86,7 +90,7 @@ void MainWindow::DisplayProgram()
 
     }
 
-    pc = m_computer.m_cpu.r.pc;
+    pc = m_computer->m_cpu.r.pc;
     while (m_commands.count()<6)
         m_commands.append(" ");
 
@@ -98,7 +102,7 @@ void MainWindow::DisplayProgram()
     for (int i=0;i<8;i++) {
         QString f="";
         QString af = "";
-        QString cmd = m_computer.m_cpu.getInstructionAt(pc);
+        QString cmd = m_computer->m_cpu.getInstructionAt(pc);
 
             if (i==0) {
                 f="<font color=\"#80FF80\">";
@@ -121,25 +125,25 @@ void MainWindow::DisplayProgram()
 void MainWindow::UpdateStatus()
 {
     QString out;
-    out +="<p>&nbsp; pc = " + Util::numToHex((unsigned int)m_computer.m_cpu.r.pc);
-    out +="&nbsp; a = " + Util::numToHex((uchar)m_computer.m_cpu.r.a);
-    out +="&nbsp; x = " + Util::numToHex((uchar)m_computer.m_cpu.r.x);
-    out +="&nbsp; y = " + Util::numToHex((uchar)m_computer.m_cpu.r.y);
-    out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer.m_cpu.r.Z);
-    out +="&nbsp; C = " + Util::numToHex((uchar)m_computer.m_cpu.r.C);
-    out +="&nbsp; N = " + Util::numToHex((uchar)m_computer.m_cpu.r.N);
+    out +="<p>&nbsp; pc = " + Util::numToHex((unsigned int)m_computer->m_cpu.r.pc);
+    out +="&nbsp; a = " + Util::numToHex((uchar)m_computer->m_cpu.r.a);
+    out +="&nbsp; x = " + Util::numToHex((uchar)m_computer->m_cpu.r.x);
+    out +="&nbsp; y = " + Util::numToHex((uchar)m_computer->m_cpu.r.y);
+    out +="&nbsp; Z = " + Util::numToHex((uchar)m_computer->m_cpu.r.Z);
+    out +="&nbsp; C = " + Util::numToHex((uchar)m_computer->m_cpu.r.C);
+    out +="&nbsp; N = " + Util::numToHex((uchar)m_computer->m_cpu.r.N);
 //    out +="&nbsp; Time = " + Util::numToHex((uchar)m_computer.m_pram.get(m_computer.m_okvc.p_time));
     out +="<br>";
     for (ushort i=0;i<32;i++)
-        out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(m_computer.m_okvc.p_p1_x+i)));
+        out+="&nbsp; " + Util::numToHex((uchar)(m_computer->m_pram.get(m_computer->m_okvc.p_p1_x+i)));
 /*    out +="<br>";
     for (ushort i=0;i<32;i++)
         out+="&nbsp; " + Util::numToHex((uchar)(m_computer.m_pram.get(0xD400+i)));
 */
     // Smoothen workload
     if (m_workLoad == 0.0)
-        m_workLoad = m_computer.m_workLoad;
-    m_workLoad = m_workLoad*0.95 + m_computer.m_workLoad*0.05;
+        m_workLoad = m_computer->m_workLoad;
+    m_workLoad = m_workLoad*0.95 + m_computer->m_workLoad*0.05;
     out+="<br>Workload : " + QString::number((int)m_workLoad) + "%";
     ui->txtStatus->setText(out);
 }
@@ -161,7 +165,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     if (e->text().count()>0)
         c = e->text().at(0).toLatin1();
 //    qDebug() << c;
-    m_computer.setKey(c);
+    m_computer->setKey(c);
 }
 
 void MainWindow::SetDarkPalette() {
@@ -234,18 +238,18 @@ void MainWindow::ResetFocus()
 void MainWindow::onEmitOutput()
 {
 //    qDebug() << m_count;
-    if (m_computer.m_abort)
+    if (m_computer->m_abort)
         return;
 
 
 
-    m_computer.m_outputBusy=true;
+    m_computer->m_outputBusy=true;
 //    m_computer.m_okvc.GenerateOutputSignal();
-    m_computer.m_outPut = m_computer.m_outPut.fromImage(m_computer.m_okvc.m_screen, Qt::AutoColor);
+    m_computer->m_outPut = m_computer->m_outPut.fromImage(m_computer->m_okvc.m_screen, Qt::AutoColor);
 
 //    ui->lblOutput->setPixmap(m_computer.m_outPut.scaled(256*2,256*2,Qt::KeepAspectRatio));
 
-    ui->widget->setTexture(m_computer.m_okvc.m_screen);
+    ui->widget->setTexture(m_computer->m_okvc.m_screen);
 //    ui->widget->setFixedSize(m_size, m_size*0.9);
 
     if (ui->txtStatus->isVisible()) {
@@ -255,41 +259,41 @@ void MainWindow::onEmitOutput()
             DisplayProgram();
     }
     m_count++;
-    m_computer.m_outputBusy=false;
+    m_computer->m_outputBusy=false;
 
 }
 
 void MainWindow::on_load_file(QString filename)
 {
 
-    m_computer.m_run =false;
-    m_computer.msleep(25);
+    m_computer->m_run =false;
+    m_computer->msleep(25);
     QThread::msleep(25);
 
 
-    m_computer.LoadProgram(filename);
-    m_computer.Reset();
+    m_computer->LoadProgram(filename);
+    m_computer->Reset();
     ui->widget->Reset();
-    m_computer.m_run =true;
+    m_computer->m_run =true;
 
 }
 
 void MainWindow::on_btnNext_clicked()
 {
-    m_computer.Step();
+    m_computer->Step();
     ResetFocus();
 }
 
 void MainWindow::on_btnRun_clicked()
 {
-    m_computer.Run();
+    m_computer->Run();
     ResetFocus();
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    m_computer.m_run = !m_computer.m_run;
-    if (m_computer.m_run)
+    m_computer->m_run = !m_computer->m_run;
+    if (m_computer->m_run)
         ui->pushButton->setText("Pause");
     else
         ui->pushButton->setText("Continue");
@@ -311,14 +315,14 @@ void MainWindow::onQuit()
 //    m_settings.
     m_settings->setValue("ui/curtab",ui->tabMain->currentIndex());
 
-    m_computer.m_abort = true;
-    m_computer.msleep(250);
+    m_computer->m_abort = true;
+    m_computer->msleep(250);
     QThread::msleep(250);
 }
 
 void MainWindow::on_leDIr_textChanged(const QString &arg1)
 {
-    m_computer.m_okvc.m_currentDir = arg1;
+    m_computer->m_okvc.m_currentDir = arg1;
     m_settings->setValue("ui/curdir",arg1);
 
 }
@@ -380,7 +384,7 @@ void MainWindow::on_actionLoad_prorgram_from_file_triggered()
         tr("Open .prg file"), "", tr("OK64 programs (*.prg)"));
    if (fileName=="")
        return;
-   m_computer.LoadProgram(fileName);
+   m_computer->LoadProgram(fileName);
 
 }
 

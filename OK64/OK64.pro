@@ -34,24 +34,26 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         source/6502/impl.cpp \
+        source/abstractcomputer.cpp \
         source/dialogabout.cpp \
         source/glwidget.cpp \
+        source/okcomputer.cpp \
         source/okmemory.cpp \
         source/rvc.cpp \
         source/6502/mos6502.cpp \
-        source/misc/util.cpp \
-        source/rcomputer.cpp
+        source/misc/util.cpp
 
 HEADERS += \
         mainwindow.h \
         source/6502/impl.h \
+        source/abstractcomputer.h \
         source/dialogabout.h \
         source/glwidget.h \
+        source/okcomputer.h \
         source/okmemory.h \
         source/rvc.h \
         source/6502/mos6502.h \
-        source/misc/util.h \
-        source/rcomputer.h
+        source/misc/util.h
 
 FORMS += \
         mainwindow.ui \
@@ -86,9 +88,11 @@ linux*{
 }
 
 macx*{
-    LIBS +=  -L/usr/local/lib/ -lresid -lsdl
+    LIBS +=  -L/usr/local/lib/ -L/opt/homebrew/Cellar/sdl12-compat/1.2.68/include/ -L/opt/homebrew/lib/ -lresid -lsdl2
     QMAKE_CXXFLAGS += -openmp -O2
     INCLUDEPATH+=/usr/local/include
+#    INCLUDEPATH+=/opt/homebrew/Cellar/sdl12-compat/1.2.68/include/
+    INCLUDEPATH+=/opt/homebrew/Cellar/sdl2/2.28.5/include/
 
 }
 
